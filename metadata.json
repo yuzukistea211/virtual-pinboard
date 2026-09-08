@@ -1,6 +1,6 @@
 {
   "name": "Pinboard",
-  "description": "A minimal, distraction-free pure white canvas to organize, edit, and drag-and-drop markdown sticky notes with local storage and JSON backup.",
+  "description": "A minimal, distraction-free pure white canvas to organize, edit, and drag-and-drop markdown sticky notes across multiple pinboards with local storage and JSON backup.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

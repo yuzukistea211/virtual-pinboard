@@ -7,13 +7,22 @@ import React, { useRef, useState, useEffect } from 'react';
 import { usePinboard } from './hooks/usePinboard';
 import { StickyNoteCard } from './components/StickyNoteCard';
 import { MinimalDock } from './components/MinimalDock';
+import { BoardSwitcher } from './components/BoardSwitcher';
 import { DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT } from './constants';
 import { FileText } from 'lucide-react';
 
 export default function App() {
   const {
+    boards,
+    activeBoard,
+    activeBoardId,
     notes,
     lastSaved,
+    selectBoard,
+    createBoard,
+    renameBoard,
+    deleteBoard,
+    duplicateBoard,
     addNote,
     updateNoteContent,
     updateNotePosition,
@@ -80,17 +89,33 @@ export default function App() {
       className="relative w-screen h-screen overflow-auto bg-white select-none cursor-default"
       style={{ backgroundColor: '#ffffff' }}
     >
-      {/* Subtle top-left branding & clean hint */}
-      <header className="fixed top-4 left-5 z-40 flex items-center gap-3 pointer-events-none select-none">
-        <h1 className="text-xs font-semibold tracking-wider text-neutral-400 uppercase">
-          Pinboard
-        </h1>
-        <span className="text-[11px] text-neutral-400 font-normal">
+      {/* Top Header: Brand & Pinboard Selector */}
+      <header className="fixed top-3 left-4 z-40 flex items-center gap-3 select-none">
+        <div className="flex items-center gap-2.5">
+          <h1 className="text-xs font-semibold tracking-wider text-neutral-400 uppercase pointer-events-none">
+            Pinboard
+          </h1>
+          <span className="text-neutral-300 font-light text-sm pointer-events-none">/</span>
+          <div className="pointer-events-auto">
+            <BoardSwitcher
+              boards={boards}
+              activeBoard={activeBoard}
+              activeBoardId={activeBoardId}
+              onSelectBoard={selectBoard}
+              onCreateBoard={createBoard}
+              onRenameBoard={renameBoard}
+              onDeleteBoard={deleteBoard}
+              onDuplicateBoard={duplicateBoard}
+              onExportAll={() => exportBoardJSON(true)}
+            />
+          </div>
+        </div>
+        <span className="hidden md:inline-block text-[11px] text-neutral-400 font-normal pointer-events-none ml-1">
           Drag &ldquo;+ Drag Note&rdquo; onto canvas &bull; Markdown supported
         </span>
       </header>
 
-      {/* Empty State when no notes are on the board */}
+      {/* Empty State when no notes are on the current board */}
       {notes.length === 0 && (
         <div
           id="empty-state-canvas"
@@ -99,11 +124,11 @@ export default function App() {
           <div className="w-12 h-12 border border-dashed border-neutral-300 flex items-center justify-center text-neutral-400 mb-3">
             <FileText className="w-5 h-5" />
           </div>
-          <p className="text-sm text-neutral-500 font-normal">
-            Pure white canvas is empty.
+          <p className="text-sm text-neutral-600 font-medium">
+            &ldquo;{activeBoard.name}&rdquo; is empty.
           </p>
-          <p className="text-xs text-neutral-400 mt-1">
-            Drag the <span className="font-semibold text-neutral-700">+ Drag Note</span> element from the bottom bar onto any point of the canvas.
+          <p className="text-xs text-neutral-400 mt-1 max-w-sm">
+            Drag the <span className="font-semibold text-neutral-700">+ Drag Note</span> element from the bottom toolbar onto the canvas to add your first note.
           </p>
         </div>
       )}
@@ -150,9 +175,10 @@ export default function App() {
       {/* Floating Minimal Toolbar */}
       <MinimalDock
         noteCount={notes.length}
+        boardName={activeBoard.name}
         lastSaved={lastSaved}
         onStartDragNewNote={handleStartDragNewNote}
-        onExport={exportBoardJSON}
+        onExport={() => exportBoardJSON(false)}
         onImport={importBoardJSON}
         onClear={clearBoard}
         isDraggingNewNote={isDraggingNewNote}
@@ -160,3 +186,4 @@ export default function App() {
     </main>
   );
 }
+

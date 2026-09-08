@@ -3,6 +3,7 @@ import { Download, Upload, Trash2, Check, FileText } from 'lucide-react';
 
 interface MinimalDockProps {
   noteCount: number;
+  boardName?: string;
   lastSaved: number;
   onStartDragNewNote: (e: React.PointerEvent<HTMLDivElement>) => void;
   onExport: () => void;
@@ -13,6 +14,7 @@ interface MinimalDockProps {
 
 export const MinimalDock: React.FC<MinimalDockProps> = ({
   noteCount,
+  boardName,
   onStartDragNewNote,
   onExport,
   onImport,
@@ -137,6 +139,11 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
 
         {/* Note Counter & Save Status */}
         <div className="flex items-center gap-1.5 px-1.5 text-[11px] text-neutral-500">
+          {boardName && (
+            <span className="font-medium text-neutral-700 max-w-[100px] truncate hidden md:inline-block">
+              {boardName} &bull;
+            </span>
+          )}
           <span>{noteCount} {noteCount === 1 ? 'note' : 'notes'}</span>
           <span className="flex items-center text-emerald-700 font-medium gap-0.5">
             <Check className="w-3 h-3" />

@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { StickyNote, BoardExportData } from '../types';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { StickyNote, Pinboard, BoardExportData, MultiBoardExportData } from '../types';
 import {
   STORAGE_KEY,
+  BOARDS_STORAGE_KEY,
+  ACTIVE_BOARD_STORAGE_KEY,
   INITIAL_NOTES,
   DEFAULT_NOTE_WIDTH,
   DEFAULT_NOTE_HEIGHT,
@@ -9,56 +11,251 @@ import {
   MIN_NOTE_HEIGHT,
 } from '../constants';
 
+function generateId(prefix: string = 'id'): string {
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+}
+
 export function usePinboard() {
-  const [notes, setNotes] = useState<StickyNote[]>(() => {
+  // Initialize boards from local storage with migration fallback
+  const [boards, setBoards] = useState<Pinboard[]>(() => {
     try {
-      // Check v2 first, fallback to v1 if present
-      const stored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('pinboard_notes_storage_v1');
-      if (stored) {
-        const parsed = JSON.parse(stored);
+      // 1. Check for multi-board storage
+      const storedBoards = localStorage.getItem(BOARDS_STORAGE_KEY);
+      if (storedBoards) {
+        const parsed = JSON.parse(storedBoards);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map((n: any) => ({
+          return parsed.map((b: any, bIdx: number) => ({
+            id: typeof b.id === 'string' && b.id ? b.id : `board_${bIdx + 1}`,
+            name: typeof b.name === 'string' && b.name.trim() ? b.name.trim() : `Board ${bIdx + 1}`,
+            createdAt: typeof b.createdAt === 'number' ? b.createdAt : Date.now(),
+            updatedAt: typeof b.updatedAt === 'number' ? b.updatedAt : Date.now(),
+            notes: Array.isArray(b.notes)
+              ? b.notes.map((n: any) => ({
+                  ...n,
+                  color: 'white',
+                  width: typeof n.width === 'number' && n.width >= MIN_NOTE_WIDTH ? n.width : DEFAULT_NOTE_WIDTH,
+                  height: typeof n.height === 'number' && n.height >= MIN_NOTE_HEIGHT ? n.height : DEFAULT_NOTE_HEIGHT,
+                }))
+              : [],
+          }));
+        }
+      }
+
+      // 2. Fallback: migrate from single-board storage if available
+      const legacyStored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('pinboard_notes_storage_v1');
+      if (legacyStored) {
+        const parsedLegacy = JSON.parse(legacyStored);
+        if (Array.isArray(parsedLegacy) && parsedLegacy.length > 0) {
+          const migratedNotes = parsedLegacy.map((n: any) => ({
             ...n,
             color: 'white',
             width: typeof n.width === 'number' && n.width >= MIN_NOTE_WIDTH ? n.width : DEFAULT_NOTE_WIDTH,
             height: typeof n.height === 'number' && n.height >= MIN_NOTE_HEIGHT ? n.height : DEFAULT_NOTE_HEIGHT,
           }));
+
+          return [
+            {
+              id: 'board-main',
+              name: 'Main Board',
+              notes: migratedNotes,
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            },
+          ];
         }
       }
     } catch (e) {
-      console.error('Failed to load notes from localStorage', e);
+      console.error('Failed to load boards from localStorage', e);
     }
-    return INITIAL_NOTES;
+
+    // 3. Default starter board with INITIAL_NOTES
+    return [
+      {
+        id: 'board-main',
+        name: 'Main Board',
+        notes: INITIAL_NOTES,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      },
+    ];
+  });
+
+  // Active board ID
+  const [activeBoardId, setActiveBoardId] = useState<string>(() => {
+    try {
+      const storedActiveId = localStorage.getItem(ACTIVE_BOARD_STORAGE_KEY);
+      if (storedActiveId) return storedActiveId;
+    } catch {
+      // safe fallback
+    }
+    return 'board-main';
   });
 
   const [lastSaved, setLastSaved] = useState<number>(Date.now());
   const maxZIndexRef = useRef<number>(10);
 
-  // Sync maxZIndex
+  // Ensure activeBoardId points to an existing board
+  const activeBoard = useMemo(() => {
+    const found = boards.find((b) => b.id === activeBoardId);
+    return found || boards[0] || {
+      id: 'board-fallback',
+      name: 'Default Board',
+      notes: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+  }, [boards, activeBoardId]);
+
+  const activeNotes = activeBoard.notes;
+
+  // Sync activeBoardId if it was removed
   useEffect(() => {
-    if (notes.length > 0) {
-      const highest = Math.max(...notes.map((n) => n.zIndex || 1), 1);
+    if (!boards.some((b) => b.id === activeBoardId) && boards.length > 0) {
+      setActiveBoardId(boards[0].id);
+    }
+  }, [boards, activeBoardId]);
+
+  // Sync maxZIndex for active board
+  useEffect(() => {
+    if (activeNotes.length > 0) {
+      const highest = Math.max(...activeNotes.map((n) => n.zIndex || 1), 1);
       maxZIndexRef.current = Math.max(maxZIndexRef.current, highest);
     }
-  }, [notes]);
+  }, [activeNotes]);
 
-  // Persist to localStorage whenever notes change
+  // Persist boards to localStorage whenever boards change
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+      localStorage.setItem(BOARDS_STORAGE_KEY, JSON.stringify(boards));
+      // Also maintain legacy STORAGE_KEY for active board
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(activeNotes));
       setLastSaved(Date.now());
     } catch (e) {
-      console.error('Failed to save notes to localStorage', e);
+      console.error('Failed to save boards to localStorage', e);
     }
-  }, [notes]);
+  }, [boards, activeNotes]);
+
+  // Persist activeBoardId
+  useEffect(() => {
+    try {
+      localStorage.setItem(ACTIVE_BOARD_STORAGE_KEY, activeBoardId);
+    } catch (e) {
+      console.error('Failed to save activeBoardId to localStorage', e);
+    }
+  }, [activeBoardId]);
+
+  // Board management actions
+  const selectBoard = useCallback((boardId: string) => {
+    if (boards.some((b) => b.id === boardId)) {
+      setActiveBoardId(boardId);
+    }
+  }, [boards]);
+
+  const createBoard = useCallback((initialName?: string) => {
+    const newBoardId = generateId('board');
+    const boardName = initialName?.trim() || `Board ${boards.length + 1}`;
+
+    const newBoard: Pinboard = {
+      id: newBoardId,
+      name: boardName,
+      notes: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+
+    setBoards((prev) => [...prev, newBoard]);
+    setActiveBoardId(newBoardId);
+    return newBoard;
+  }, [boards.length]);
+
+  const renameBoard = useCallback((boardId: string, newName: string) => {
+    const trimmed = newName.trim();
+    if (!trimmed) return;
+
+    setBoards((prev) =>
+      prev.map((b) =>
+        b.id === boardId ? { ...b, name: trimmed, updatedAt: Date.now() } : b
+      )
+    );
+  }, []);
+
+  const deleteBoard = useCallback((boardId: string) => {
+    setBoards((prev) => {
+      // If deleting the only board, reset it to an empty board
+      if (prev.length <= 1) {
+        return [
+          {
+            id: 'board-main',
+            name: 'Main Board',
+            notes: [],
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          },
+        ];
+      }
+      return prev.filter((b) => b.id !== boardId);
+    });
+
+    // If deleting the current active board, switch to another board
+    setActiveBoardId((prevActive) => {
+      if (prevActive === boardId) {
+        const remaining = boards.filter((b) => b.id !== boardId);
+        return remaining[0]?.id || 'board-main';
+      }
+      return prevActive;
+    });
+  }, [boards]);
+
+  const duplicateBoard = useCallback((boardId: string) => {
+    const targetBoard = boards.find((b) => b.id === boardId);
+    if (!targetBoard) return;
+
+    const newBoardId = generateId('board');
+    const duplicatedNotes: StickyNote[] = targetBoard.notes.map((n, i) => ({
+      ...n,
+      id: generateId('note') + `_${i}`,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    }));
+
+    const newBoard: Pinboard = {
+      id: newBoardId,
+      name: `${targetBoard.name} (Copy)`,
+      notes: duplicatedNotes,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+
+    setBoards((prev) => [...prev, newBoard]);
+    setActiveBoardId(newBoardId);
+  }, [boards]);
+
+  // Note management within active board
+  const updateActiveNotes = useCallback(
+    (updater: (currentNotes: StickyNote[]) => StickyNote[]) => {
+      setBoards((prev) =>
+        prev.map((b) => {
+          if (b.id === activeBoardId) {
+            return {
+              ...b,
+              notes: updater(b.notes),
+              updatedAt: Date.now(),
+            };
+          }
+          return b;
+        })
+      );
+    },
+    [activeBoardId]
+  );
 
   const bringToFront = useCallback((id: string) => {
     maxZIndexRef.current += 1;
     const newZ = maxZIndexRef.current;
-    setNotes((prev) =>
+    updateActiveNotes((prev) =>
       prev.map((note) => (note.id === id ? { ...note, zIndex: newZ } : note))
     );
-  }, []);
+  }, [updateActiveNotes]);
 
   const addNote = useCallback(
     (x?: number, y?: number, width: number = DEFAULT_NOTE_WIDTH, height: number = DEFAULT_NOTE_HEIGHT) => {
@@ -78,7 +275,7 @@ export function usePinboard() {
       }
 
       const newNote: StickyNote = {
-        id: 'note_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+        id: generateId('note'),
         content: '',
         x: Math.max(0, Math.round(posX)),
         y: Math.max(0, Math.round(posY)),
@@ -90,22 +287,22 @@ export function usePinboard() {
         updatedAt: Date.now(),
       };
 
-      setNotes((prev) => [...prev, newNote]);
+      updateActiveNotes((prev) => [...prev, newNote]);
       return newNote;
     },
-    []
+    [updateActiveNotes]
   );
 
   const updateNoteContent = useCallback((id: string, content: string) => {
-    setNotes((prev) =>
+    updateActiveNotes((prev) =>
       prev.map((note) =>
         note.id === id ? { ...note, content, updatedAt: Date.now() } : note
       )
     );
-  }, []);
+  }, [updateActiveNotes]);
 
   const updateNotePosition = useCallback((id: string, x: number, y: number) => {
-    setNotes((prev) =>
+    updateActiveNotes((prev) =>
       prev.map((note) =>
         note.id === id
           ? {
@@ -117,10 +314,10 @@ export function usePinboard() {
           : note
       )
     );
-  }, []);
+  }, [updateActiveNotes]);
 
   const updateNoteSize = useCallback((id: string, width: number, height: number) => {
-    setNotes((prev) =>
+    updateActiveNotes((prev) =>
       prev.map((note) =>
         note.id === id
           ? {
@@ -132,41 +329,54 @@ export function usePinboard() {
           : note
       )
     );
-  }, []);
+  }, [updateActiveNotes]);
 
   const deleteNote = useCallback((id: string) => {
-    setNotes((prev) => prev.filter((note) => note.id !== id));
-  }, []);
+    updateActiveNotes((prev) => prev.filter((note) => note.id !== id));
+  }, [updateActiveNotes]);
 
   const clearBoard = useCallback(() => {
-    setNotes([]);
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (e) {
-      console.error(e);
+    updateActiveNotes(() => []);
+  }, [updateActiveNotes]);
+
+  // Export & Import
+  const exportBoardJSON = useCallback((exportAll: boolean = false) => {
+    const dateStr = new Date().toISOString().split('T')[0];
+    let jsonString = '';
+    let filename = '';
+
+    if (exportAll) {
+      const payload: MultiBoardExportData = {
+        version: 2,
+        exportedAt: new Date().toISOString(),
+        activeBoardId,
+        boards,
+      };
+      jsonString = JSON.stringify(payload, null, 2);
+      filename = `pinboards-all-backup-${dateStr}.json`;
+    } else {
+      const payload: BoardExportData = {
+        version: 2,
+        exportedAt: new Date().toISOString(),
+        boardName: activeBoard.name,
+        noteCount: activeNotes.length,
+        notes: activeNotes,
+      };
+      jsonString = JSON.stringify(payload, null, 2);
+      const safeName = activeBoard.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      filename = `pinboard-${safeName}-${dateStr}.json`;
     }
-  }, []);
 
-  const exportBoardJSON = useCallback(() => {
-    const exportPayload: BoardExportData = {
-      version: 2,
-      exportedAt: new Date().toISOString(),
-      noteCount: notes.length,
-      notes,
-    };
-
-    const jsonString = JSON.stringify(exportPayload, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    const dateStr = new Date().toISOString().split('T')[0];
     a.href = url;
-    a.download = `pinboard-backup-${dateStr}.json`;
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [notes]);
+  }, [boards, activeBoard, activeBoardId, activeNotes]);
 
   const importBoardJSON = useCallback((file: File): Promise<{ success: boolean; count?: number; error?: string }> => {
     return new Promise((resolve) => {
@@ -176,21 +386,59 @@ export function usePinboard() {
           const content = e.target?.result as string;
           const parsed = JSON.parse(content);
 
+          // Case 1: Multi-board backup (parsed.boards is array)
+          if (parsed && Array.isArray(parsed.boards) && parsed.boards.length > 0) {
+            const importedBoards: Pinboard[] = parsed.boards.map((b: any, bIdx: number) => ({
+              id: typeof b.id === 'string' && b.id ? b.id : generateId(`board_${bIdx}`),
+              name: typeof b.name === 'string' && b.name.trim() ? b.name.trim() : `Imported Board ${bIdx + 1}`,
+              createdAt: typeof b.createdAt === 'number' ? b.createdAt : Date.now(),
+              updatedAt: Date.now(),
+              notes: Array.isArray(b.notes)
+                ? b.notes.map((n: any, nIdx: number) => ({
+                    id: typeof n.id === 'string' ? n.id : generateId(`note_${nIdx}`),
+                    content: typeof n.content === 'string' ? n.content : '',
+                    x: typeof n.x === 'number' && !isNaN(n.x) ? Math.max(0, n.x) : 50,
+                    y: typeof n.y === 'number' && !isNaN(n.y) ? Math.max(0, n.y) : 50,
+                    width: typeof n.width === 'number' && n.width >= MIN_NOTE_WIDTH ? n.width : DEFAULT_NOTE_WIDTH,
+                    height: typeof n.height === 'number' && n.height >= MIN_NOTE_HEIGHT ? n.height : DEFAULT_NOTE_HEIGHT,
+                    color: 'white',
+                    zIndex: typeof n.zIndex === 'number' ? n.zIndex : nIdx + 1,
+                    createdAt: typeof n.createdAt === 'number' ? n.createdAt : Date.now(),
+                    updatedAt: Date.now(),
+                  }))
+                : [],
+            }));
+
+            setBoards(importedBoards);
+            const targetActive = parsed.activeBoardId && importedBoards.some((b) => b.id === parsed.activeBoardId)
+              ? parsed.activeBoardId
+              : importedBoards[0].id;
+            setActiveBoardId(targetActive);
+            resolve({ success: true, count: importedBoards.length });
+            return;
+          }
+
+          // Case 2: Single board export or notes array
           let importedNotes: any[] = [];
+          let importedName = 'Imported Board';
+
           if (Array.isArray(parsed)) {
             importedNotes = parsed;
           } else if (parsed && Array.isArray(parsed.notes)) {
             importedNotes = parsed.notes;
+            if (typeof parsed.boardName === 'string' && parsed.boardName.trim()) {
+              importedName = parsed.boardName.trim();
+            }
           } else {
-            resolve({ success: false, error: 'Invalid JSON format. Expected notes array.' });
+            resolve({ success: false, error: 'Invalid JSON format. Expected notes or boards.' });
             return;
           }
 
           const validNotes: StickyNote[] = importedNotes.map((n, idx) => ({
-            id: typeof n.id === 'string' ? n.id : `imported_${Date.now()}_${idx}`,
+            id: typeof n.id === 'string' ? n.id : generateId('note') + `_${idx}`,
             content: typeof n.content === 'string' ? n.content : '',
-            x: typeof n.x === 'number' && !isNaN(n.x) ? Math.max(0, n.x) : 50 + idx * 25,
-            y: typeof n.y === 'number' && !isNaN(n.y) ? Math.max(0, n.y) : 50 + idx * 25,
+            x: typeof n.x === 'number' && !isNaN(n.x) ? Math.max(0, n.x) : 50 + (idx % 10) * 30,
+            y: typeof n.y === 'number' && !isNaN(n.y) ? Math.max(0, n.y) : 50 + (idx % 10) * 30,
             width: typeof n.width === 'number' && n.width >= MIN_NOTE_WIDTH ? n.width : DEFAULT_NOTE_WIDTH,
             height: typeof n.height === 'number' && n.height >= MIN_NOTE_HEIGHT ? n.height : DEFAULT_NOTE_HEIGHT,
             color: 'white',
@@ -199,9 +447,20 @@ export function usePinboard() {
             updatedAt: Date.now(),
           }));
 
-          setNotes(validNotes);
+          // Ask to add as a new board or replace current
+          const newBoardId = generateId('board');
+          const newBoard: Pinboard = {
+            id: newBoardId,
+            name: importedName,
+            notes: validNotes,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          };
+
+          setBoards((prev) => [...prev, newBoard]);
+          setActiveBoardId(newBoardId);
           resolve({ success: true, count: validNotes.length });
-        } catch (err) {
+        } catch {
           resolve({ success: false, error: 'Unable to parse JSON file.' });
         }
       };
@@ -213,8 +472,16 @@ export function usePinboard() {
   }, []);
 
   return {
-    notes,
+    boards,
+    activeBoard,
+    activeBoardId,
+    notes: activeNotes,
     lastSaved,
+    selectBoard,
+    createBoard,
+    renameBoard,
+    deleteBoard,
+    duplicateBoard,
     addNote,
     updateNoteContent,
     updateNotePosition,
@@ -226,3 +493,4 @@ export function usePinboard() {
     importBoardJSON,
   };
 }
+

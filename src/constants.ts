@@ -1,6 +1,8 @@
-import { StickyNote } from './types';
+import { StickyNote, Pinboard } from './types';
 
 export const STORAGE_KEY = 'pinboard_notes_storage_v2';
+export const BOARDS_STORAGE_KEY = 'pinboards_storage_v1';
+export const ACTIVE_BOARD_STORAGE_KEY = 'pinboard_active_board_id_v1';
 
 export const DEFAULT_NOTE_WIDTH = 240;
 export const DEFAULT_NOTE_HEIGHT = 200;

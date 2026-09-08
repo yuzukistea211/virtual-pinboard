@@ -23,9 +23,25 @@ export interface StickyNote {
   updatedAt: number;
 }
 
+export interface Pinboard {
+  id: string;
+  name: string;
+  notes: StickyNote[];
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface BoardExportData {
   version: number;
   exportedAt: string;
+  boardName?: string;
   noteCount: number;
   notes: StickyNote[];
+}
+
+export interface MultiBoardExportData {
+  version: number;
+  exportedAt: string;
+  activeBoardId: string;
+  boards: Pinboard[];
 }
