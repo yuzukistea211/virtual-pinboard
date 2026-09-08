@@ -45,3 +45,36 @@ export interface MultiBoardExportData {
   activeBoardId: string;
   boards: Pinboard[];
 }
+
+export type FontApplyScope = 'all' | 'notes-only';
+
+export interface FontOption {
+  id: string;
+  name: string;
+  category: 'sans' | 'serif' | 'mono' | 'handwriting' | 'display' | 'custom';
+  fontFamily: string;
+  isCustom?: boolean;
+  sourceType?: 'preset' | 'file' | 'web';
+  webUrl?: string;
+  fileName?: string;
+  createdAt?: number;
+}
+
+export interface CustomFontRecord {
+  id: string;
+  name: string;
+  fontFamily: string;
+  sourceType: 'file' | 'web';
+  fileData?: string; // base64 data url for uploaded fonts
+  fileName?: string;
+  webUrl?: string;
+  format?: string;
+  createdAt: number;
+}
+
+export interface FontSettings {
+  selectedFontId: string;
+  applyTo: FontApplyScope;
+  sizeScale: number; // percentage (90, 100, 110, 120)
+}
+

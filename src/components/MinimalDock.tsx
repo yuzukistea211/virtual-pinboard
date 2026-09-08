@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Download, Upload, Trash2, Check, FileText } from 'lucide-react';
+import { Download, Upload, Trash2, Check, FileText, Type } from 'lucide-react';
 
 interface MinimalDockProps {
   noteCount: number;
@@ -9,6 +9,8 @@ interface MinimalDockProps {
   onExport: () => void;
   onImport: (file: File) => Promise<{ success: boolean; count?: number; error?: string }>;
   onClear: () => void;
+  onOpenFontSettings?: () => void;
+  activeFontName?: string;
   isDraggingNewNote?: boolean;
 }
 
@@ -19,6 +21,8 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
   onExport,
   onImport,
   onClear,
+  onOpenFontSettings,
+  activeFontName,
   isDraggingNewNote,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -95,6 +99,20 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
           <Upload className="w-3.5 h-3.5" />
           <span>Import</span>
         </button>
+
+        {/* Font Customization Button */}
+        {onOpenFontSettings && (
+          <button
+            type="button"
+            id="btn-font-settings-dock"
+            onClick={onOpenFontSettings}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 hover:bg-neutral-100 active:bg-neutral-200 text-neutral-700 hover:text-neutral-900 text-xs font-medium transition-colors"
+            title={`Font settings: ${activeFontName || 'Default'}`}
+          >
+            <Type className="w-3.5 h-3.5 text-neutral-600" />
+            <span className="hidden sm:inline">Font</span>
+          </button>
+        )}
 
         {/* Clear All Notes */}
         {showClearConfirm ? (

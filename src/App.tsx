@@ -5,11 +5,13 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { usePinboard } from './hooks/usePinboard';
+import { useFontSettings } from './hooks/useFontSettings';
 import { StickyNoteCard } from './components/StickyNoteCard';
 import { MinimalDock } from './components/MinimalDock';
 import { BoardSwitcher } from './components/BoardSwitcher';
+import { FontSettingsModal } from './components/FontSettingsModal';
 import { DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT } from './constants';
-import { FileText } from 'lucide-react';
+import { FileText, Type } from 'lucide-react';
 
 export default function App() {
   const {
@@ -33,6 +35,9 @@ export default function App() {
     exportBoardJSON,
     importBoardJSON,
   } = usePinboard();
+
+  const fontManager = useFontSettings();
+  const [isFontModalOpen, setIsFontModalOpen] = useState(false);
 
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -86,11 +91,13 @@ export default function App() {
     <main
       ref={canvasRef}
       id="canvas-container"
-      className="relative w-screen h-screen overflow-auto bg-white select-none cursor-default"
+      className={`relative w-screen h-screen overflow-auto bg-white select-none cursor-default transition-[filter,opacity] duration-200 ${
+        isFontModalOpen ? 'blur-[1px] pointer-events-none select-none' : ''
+      }`}
       style={{ backgroundColor: '#ffffff' }}
     >
       {/* Top Header: Brand & Pinboard Selector */}
-      <header className="fixed top-3 left-4 z-40 flex items-center gap-3 select-none">
+      <header className="fixed top-3 left-4 z-50 flex items-center gap-3 select-none">
         <div className="flex items-center gap-2.5">
           <h1 className="text-xs font-semibold tracking-wider text-neutral-400 uppercase pointer-events-none">
             Pinboard
@@ -111,9 +118,23 @@ export default function App() {
           </div>
         </div>
         <span className="hidden md:inline-block text-[11px] text-neutral-400 font-normal pointer-events-none ml-1">
-          Drag &ldquo;+ Drag Note&rdquo; onto canvas &bull; Markdown supported
         </span>
       </header>
+
+      {/* Top Right: Font Settings Control */}
+      <div className="fixed top-3 right-4 z-50 flex items-center gap-2 select-none">
+        <button
+          type="button"
+          id="btn-open-font-settings"
+          onClick={() => setIsFontModalOpen(true)}
+          className="flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-neutral-50 active:bg-neutral-100 text-neutral-800 border border-neutral-300 shadow-2xs text-xs font-medium transition-colors"
+          title={`Interface font: ${fontManager.activeFont.name}. Click to change or import font.`}
+        >
+          <Type className="w-3.5 h-3.5 text-neutral-600" />
+          <span className="hidden sm:inline text-neutral-400 font-normal">Font:</span>
+          <span className="font-semibold max-w-[130px] truncate">{fontManager.activeFont.name}</span>
+        </button>
+      </div>
 
       {/* Empty State when no notes are on the current board */}
       {notes.length === 0 && (
@@ -134,7 +155,7 @@ export default function App() {
       )}
 
       {/* Interactive Sticky Notes Layer */}
-      <div id="notes-layer" className="relative min-w-full min-h-full">
+      <div id="notes-layer" className="relative z-10 min-w-full min-h-full">
         {notes.map((note) => (
           <StickyNoteCard
             key={note.id}
@@ -181,7 +202,27 @@ export default function App() {
         onExport={() => exportBoardJSON(false)}
         onImport={importBoardJSON}
         onClear={clearBoard}
+        onOpenFontSettings={() => setIsFontModalOpen(true)}
+        activeFontName={fontManager.activeFont.name}
         isDraggingNewNote={isDraggingNewNote}
+      />
+
+      {/* Font Customization & Import Modal */}
+      <FontSettingsModal
+        isOpen={isFontModalOpen}
+        onClose={() => setIsFontModalOpen(false)}
+        activeFont={fontManager.activeFont}
+        presetFonts={fontManager.presetFonts}
+        customFonts={fontManager.customFonts}
+        applyScope={fontManager.settings.applyTo}
+        sizeScale={fontManager.settings.sizeScale}
+        onSelectFont={fontManager.selectFont}
+        onSetApplyScope={fontManager.setApplyScope}
+        onSetSizeScale={fontManager.setSizeScale}
+        onImportLocalFont={fontManager.importLocalFont}
+        onImportWebFont={fontManager.importWebFont}
+        onRemoveCustomFont={fontManager.removeCustomFont}
+        onResetToDefault={fontManager.resetToDefault}
       />
     </main>
   );

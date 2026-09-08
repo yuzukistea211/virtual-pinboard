@@ -278,7 +278,7 @@ export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
         height: `${localSize.height}px`,
         zIndex: note.zIndex,
       }}
-      className={`absolute top-0 left-0 bg-white border border-neutral-300 rounded-none shadow-xs transition-shadow duration-100 flex flex-col select-none group ${
+      className={`sticky-note-card absolute top-0 left-0 bg-white border border-neutral-300 rounded-none shadow-xs transition-shadow duration-100 flex flex-col select-none group ${
         isDragging
           ? 'shadow-xl ring-1 ring-neutral-400 cursor-grabbing'
           : isResizing
@@ -463,7 +463,8 @@ export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
               onClick={(e) => e.stopPropagation()}
               onPointerDown={(e) => e.stopPropagation()}
               placeholder="Write in Markdown (# header, - [ ] task, **bold**)..."
-              className="w-full flex-1 bg-transparent resize-none border-none outline-hidden font-mono text-xs leading-relaxed text-neutral-800 placeholder-neutral-400 select-text cursor-text"
+              style={{ fontFamily: 'inherit' }}
+              className="w-full flex-1 bg-transparent resize-none border-none outline-hidden text-xs leading-relaxed text-neutral-800 placeholder-neutral-400 select-text cursor-text"
             />
           </div>
         ) : (

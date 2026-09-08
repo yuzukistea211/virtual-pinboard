@@ -252,6 +252,21 @@ export function usePinboard() {
   const bringToFront = useCallback((id: string) => {
     maxZIndexRef.current += 1;
     const newZ = maxZIndexRef.current;
+
+    // Keep note z-indexes tidy so they never exceed overlay layers
+    if (newZ > 500) {
+      updateActiveNotes((prev) => {
+        const sorted = [...prev].sort((a, b) => (a.zIndex || 1) - (b.zIndex || 1));
+        const normalized = sorted.map((note, idx) => ({
+          ...note,
+          zIndex: note.id === id ? sorted.length + 1 : idx + 1,
+        }));
+        maxZIndexRef.current = sorted.length + 1;
+        return normalized;
+      });
+      return;
+    }
+
     updateActiveNotes((prev) =>
       prev.map((note) => (note.id === id ? { ...note, zIndex: newZ } : note))
     );
