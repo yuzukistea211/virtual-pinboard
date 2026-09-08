@@ -13,6 +13,7 @@ import {
   loadWebFontStylesheet,
   registerLocalFontFace,
   buildGoogleFontUrl,
+  detectFontDetails,
 } from '../utils/fontPresets';
 
 export function useFontSettings() {
@@ -32,14 +33,47 @@ export function useFontSettings() {
         }
       }
 
-      // 2. Load stored custom fonts
+      // 2. Load stored custom fonts (with auto-repair for web fonts if previously saved with generic name)
       try {
         const stored = await getStoredCustomFonts();
         if (!mounted) return;
-        setCustomRecords(stored);
+
+        // Auto-repair records that were previously saved with generic 'Web Font'
+        const repaired = await Promise.all(
+          stored.map(async (record) => {
+            if (
+              record.sourceType === 'web' &&
+              record.webUrl &&
+              (!record.fontFamily ||
+                record.fontFamily.includes('"Web Font"') ||
+                record.fontFamily === 'sans-serif' ||
+                record.name === 'Web Font')
+            ) {
+              try {
+                const detected = await detectFontDetails(
+                  record.webUrl,
+                  record.name !== 'Web Font' ? record.name : undefined
+                );
+                const updated: CustomFontRecord = {
+                  ...record,
+                  name: record.name !== 'Web Font' ? record.name : detected.displayName,
+                  fontFamily: `"${detected.fontFamily}", sans-serif`,
+                };
+                await saveStoredCustomFont(updated);
+                return updated;
+              } catch {
+                return record;
+              }
+            }
+            return record;
+          })
+        );
+
+        if (!mounted) return;
+        setCustomRecords(repaired);
 
         // Register each custom font into DOM
-        for (const record of stored) {
+        for (const record of repaired) {
           if (record.sourceType === 'file' && record.fileData) {
             await registerLocalFontFace(record.fontFamily, record.fileData);
           } else if (record.sourceType === 'web' && record.webUrl) {
@@ -218,7 +252,7 @@ export function useFontSettings() {
     []
   );
 
-  // Import a web / Google font
+  // Import a web / Google font or custom CSS stylesheet
   const importWebFont = useCallback(
     async (
       fontNameOrUrl: string,
@@ -226,34 +260,18 @@ export function useFontSettings() {
     ): Promise<{ success: boolean; font?: FontOption; error?: string }> => {
       const input = fontNameOrUrl.trim();
       if (!input) {
-        return { success: false, error: 'Please enter a font name or Google Fonts URL' };
+        return { success: false, error: 'Please enter a font name, CSS URL, or @import rule' };
       }
 
       try {
-        let webUrl = '';
-        let extractedFamily = '';
-        let displayName = customName?.trim() || '';
+        const { webUrl, fontFamily, displayName } = await detectFontDetails(input, customName);
 
-        if (input.startsWith('http://') || input.startsWith('https://')) {
-          webUrl = input;
-          // Extract family from URL if possible
-          const urlObj = new URL(input);
-          const familyParam = urlObj.searchParams.get('family');
-          if (familyParam) {
-            extractedFamily = familyParam.split(':')[0].replace(/\+/g, ' ');
-          } else {
-            extractedFamily = displayName || 'Web Font';
-          }
-          if (!displayName) displayName = extractedFamily;
-        } else {
-          // Treated as font name (e.g. "Poppins", "Kalam", "Lora")
-          extractedFamily = input;
-          if (!displayName) displayName = input;
-          webUrl = buildGoogleFontUrl(input);
+        if (!webUrl) {
+          return { success: false, error: 'Invalid font URL or name provided' };
         }
 
         const fontId = `custom_web_${Date.now()}`;
-        const fullFontFamily = `"${extractedFamily}", sans-serif`;
+        const fullFontFamily = `"${fontFamily}", sans-serif`;
 
         // Load stylesheet
         await loadWebFontStylesheet(fontId, webUrl);

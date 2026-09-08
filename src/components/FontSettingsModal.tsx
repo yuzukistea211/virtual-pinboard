@@ -268,6 +268,14 @@ export const FontSettingsModal: React.FC<FontSettingsModalProps> = ({
               >
                 Glyphs
               </button>
+              <button
+                type="button"
+                onClick={() => setTestWords('永和九年，歲在癸丑，暮春之初，會于會稽山陰之蘭亭。Pinboard 123')}
+                className="px-2 py-1.5 text-[11px] text-neutral-600 bg-white border border-neutral-300 hover:bg-neutral-100 transition-colors whitespace-nowrap"
+                title="Preview Chinese / CJK glyphs"
+              >
+                中文 / CJK
+              </button>
             </div>
           </div>
 
@@ -312,7 +320,7 @@ export const FontSettingsModal: React.FC<FontSettingsModalProps> = ({
               }`}
             >
               <Globe className="w-3.5 h-3.5" />
-              <span>Import Google / Web Font</span>
+              <span>Import Web Font / CSS</span>
             </button>
           </div>
 
@@ -528,22 +536,26 @@ export const FontSettingsModal: React.FC<FontSettingsModalProps> = ({
             </form>
           )}
 
-          {/* Tab 3: Google / Web Font Import */}
+          {/* Tab 3: Google / Web Font / CSS Import */}
           {activeTab === 'import-web' && (
             <form onSubmit={handleSubmitWebImport} className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-neutral-800 block">
-                  Google Font Name or CSS URL
+                  Font Name, CSS URL, or @import Rule
                 </label>
                 <input
                   type="text"
                   value={webFontInput}
                   onChange={(e) => setWebFontInput(e.target.value)}
-                  placeholder="e.g. Poppins, Lora, Caveat, or https://fonts.googleapis.com/..."
+                  placeholder='e.g. https://fontsapi.zeoseven.com/371/main/result.css, @import url("..."), or "Poppins"'
                   className="w-full px-3 py-1.5 border border-neutral-300 text-xs text-neutral-800 focus:outline-neutral-900 font-mono"
                 />
-                <p className="text-[11px] text-neutral-400">
-                  Type any valid font name from Google Fonts or paste a Google Fonts stylesheet URL.
+                <p className="text-[11px] text-neutral-500 leading-normal">
+                  Paste any CSS font URL (ZeoSeven, Google Fonts, CDN), an{' '}
+                  <code className="font-mono text-[10px] bg-neutral-100 px-1 py-0.5 border border-neutral-200 text-neutral-700">
+                    @import url(...)
+                  </code>{' '}
+                  statement, or a Google Font name. The declared font-family will be automatically detected.
                 </p>
               </div>
 
@@ -569,15 +581,18 @@ export const FontSettingsModal: React.FC<FontSettingsModalProps> = ({
 
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-neutral-700 block">
-                  Custom Label (Optional)
+                  Custom Display Name (Optional)
                 </label>
                 <input
                   type="text"
                   value={customWebFontName}
                   onChange={(e) => setCustomWebFontName(e.target.value)}
-                  placeholder="e.g. Editorial Headings"
+                  placeholder="e.g. My Font (leave empty to auto-detect)"
                   className="w-full px-3 py-1.5 border border-neutral-300 text-xs text-neutral-800 focus:outline-neutral-900"
                 />
+                <p className="text-[11px] text-neutral-400">
+                  Leave empty to automatically use the font&apos;s official declared family name (e.g. &quot;BabelStone Han&quot;).
+                </p>
               </div>
 
               {webImportError && (

@@ -70,8 +70,18 @@ export const POPULAR_GOOGLE_FONTS_SUGGESTIONS = [
  */
 export function loadWebFontStylesheet(id: string, url: string): Promise<void> {
   return new Promise((resolve) => {
+    // Check if an existing link already loads this exact URL
+    const existing = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).find(
+      (el) => (el as HTMLLinkElement).href === url
+    );
+    if (existing) {
+      resolve();
+      return;
+    }
+
     const linkId = `web-font-${id}`;
-    if (document.getElementById(linkId)) {
+    const byId = document.getElementById(linkId);
+    if (byId) {
       resolve();
       return;
     }
@@ -110,4 +120,194 @@ export async function registerLocalFontFace(family: string, dataUrl: string): Pr
 export function buildGoogleFontUrl(fontName: string): string {
   const formatted = fontName.trim().replace(/\s+/g, '+');
   return `https://fonts.googleapis.com/css2?family=${formatted}:ital,wght@0,300..800;1,300..800&display=swap`;
+}
+
+export interface ExtractedFontInput {
+  type: 'css-url' | 'font-name';
+  url?: string;
+  name?: string;
+}
+
+/**
+ * Cleanly extract a CSS stylesheet URL from user input, supporting:
+ * - Direct URLs: https://...
+ * - @import url("https://...");
+ * - @import url('https://...');
+ * - @import url(https://...);
+ * - @import "https://...";
+ * - <link rel="stylesheet" href="https://...">
+ * - Font names (e.g. "Poppins", "Lora")
+ */
+export function extractWebFontInput(input: string): ExtractedFontInput {
+  const trimmed = input.trim();
+
+  // 1. <link ... href="..." ...> or <link ... href='...' ...>
+  const linkMatch =
+    trimmed.match(/<link[^>]+href=["'](https?:\/\/[^"'\s]+)["']/i) ||
+    trimmed.match(/href=["'](https?:\/\/[^"'\s]+)["']/i);
+  if (linkMatch) {
+    return { type: 'css-url', url: linkMatch[1] };
+  }
+
+  // 2. @import url("...") or @import '...' or @import url(...) or @import "..."
+  const importMatch = trimmed.match(
+    /@import\s+(?:url\(\s*["']?|["'])(https?:\/\/[^"'\)\s]+)["']?\s*\)?/i
+  );
+  if (importMatch) {
+    return { type: 'css-url', url: importMatch[1] };
+  }
+
+  // 3. Standalone url("...")
+  const urlFuncMatch = trimmed.match(/url\(\s*["']?(https?:\/\/[^"'\)\s]+)["']?\s*\)/i);
+  if (urlFuncMatch) {
+    return { type: 'css-url', url: urlFuncMatch[1] };
+  }
+
+  // 4. Starts with http:// or https://
+  if (/^https?:\/\//i.test(trimmed)) {
+    const cleanUrl = trimmed.replace(/[;"'\s]+$/, '').replace(/^["']+/, '');
+    return { type: 'css-url', url: cleanUrl };
+  }
+
+  // 5. Plain font name
+  return { type: 'font-name', name: trimmed };
+}
+
+export interface DetectedFontInfo {
+  webUrl: string;
+  fontFamily: string; // The exact font-family name for CSS @font-face matching (e.g. "BabelStone Han")
+  displayName: string; // The human-friendly label for the UI
+}
+
+/**
+ * Detect the real font-family and display name from any CSS URL (ZeoSeven, Google Fonts, CDN)
+ * or font name, resolving CSS contents and font metadata.
+ */
+export async function detectFontDetails(
+  input: string,
+  customLabel?: string
+): Promise<DetectedFontInfo> {
+  const extracted = extractWebFontInput(input);
+  let webUrl = '';
+  let detectedFamily: string | null = null;
+  const userDisplayName = customLabel?.trim() || '';
+
+  if (extracted.type === 'font-name') {
+    const fontName = extracted.name || 'Custom Font';
+    detectedFamily = fontName;
+    webUrl = buildGoogleFontUrl(fontName);
+  } else if (extracted.type === 'css-url' && extracted.url) {
+    webUrl = extracted.url;
+
+    // A. Check if Google Fonts URL format (family=FontName:wght@...)
+    try {
+      const parsed = new URL(webUrl);
+      const familyParam = parsed.searchParams.get('family');
+      if (familyParam) {
+        const name = familyParam.split(':')[0].replace(/\+/g, ' ').trim();
+        if (name) {
+          detectedFamily = name;
+        }
+      }
+    } catch {
+      // ignore
+    }
+
+    // B. Fetch CSS text directly (ZeoSeven, Google Fonts, jsDelivr, unpkg all support CORS)
+    if (!detectedFamily) {
+      try {
+        const resp = await fetch(webUrl);
+        if (resp.ok) {
+          const cssText = await resp.text();
+
+          // 1. Check for comment metadata: FontFamilyName / FullFontName (common in ZeoSeven, cn-font-split)
+          const commentMatch = cssText.match(/(?:FontFamilyName|FullFontName)\s*[:\s]\s*([^\r\n*\/]+)/i);
+          if (commentMatch && commentMatch[1]) {
+            const commentName = commentMatch[1].trim();
+            if (commentName) {
+              detectedFamily = commentName;
+            }
+          }
+
+          // 2. Search for font-family: "..." inside CSS / @font-face rules
+          if (!detectedFamily) {
+            const fontMatches = Array.from(
+              cssText.matchAll(/font-family\s*:\s*["']?([^"';}{]+)["']?/gi)
+            );
+            for (const match of fontMatches) {
+              const cand = match[1]?.trim();
+              if (
+                cand &&
+                !['inherit', 'initial', 'sans-serif', 'serif', 'monospace', 'cursive'].includes(
+                  cand.toLowerCase()
+                )
+              ) {
+                detectedFamily = cand;
+                break;
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Direct CSS fetch was not accessible via CORS or offline:', err);
+      }
+    }
+
+    // C. Inspect document.fonts before and after loading the stylesheet
+    if (!detectedFamily && typeof document !== 'undefined' && document.fonts) {
+      const beforeFamilies = new Set(
+        Array.from(document.fonts).map((f) => f.family.replace(/['"]/g, '').trim())
+      );
+
+      await loadWebFontStylesheet(`temp_detect_${Date.now()}`, webUrl);
+      try {
+        await document.fonts.ready;
+      } catch {
+        // ignore
+      }
+
+      const afterFamilies = Array.from(document.fonts).map((f) =>
+        f.family.replace(/['"]/g, '').trim()
+      );
+      const newlyAdded = afterFamilies.find((f) => f && !beforeFamilies.has(f));
+      if (newlyAdded) {
+        detectedFamily = newlyAdded;
+      }
+    }
+
+    // D. URL pathname heuristics (e.g. /fonts/SmileySans.css or /SmileySans/result.css)
+    if (!detectedFamily) {
+      try {
+        const urlObj = new URL(webUrl);
+        const segments = urlObj.pathname.split('/').filter(Boolean);
+        const lastPart = segments[segments.length - 1] || '';
+        const nameNoExt = lastPart.replace(/\.css$/i, '');
+        if (
+          nameNoExt &&
+          !['result', 'index', 'style', 'font', 'main'].includes(nameNoExt.toLowerCase())
+        ) {
+          detectedFamily = nameNoExt.replace(/[-_]/g, ' ');
+        } else if (segments.length > 1) {
+          const parentSeg = segments[segments.length - 2];
+          if (
+            parentSeg &&
+            !['css', 'main', 'dist', 'build', 'v1', 'v2', 'v3'].includes(parentSeg.toLowerCase())
+          ) {
+            detectedFamily = parentSeg.replace(/[-_]/g, ' ');
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  const finalFamily = detectedFamily || userDisplayName || 'Custom Web Font';
+  const finalDisplayName = userDisplayName || detectedFamily || finalFamily;
+
+  return {
+    webUrl,
+    fontFamily: finalFamily,
+    displayName: finalDisplayName,
+  };
 }
