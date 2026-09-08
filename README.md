@@ -16,29 +16,47 @@ A minimal, distraction-free pure white canvas to organize, edit, and drag-and-dr
 
 ## Deploying to GitHub Pages
 
-This project is configured out of the box for static deployment to GitHub Pages.
+If your site shows a blank page, it is because GitHub Pages is attempting to serve raw TypeScript source files rather than the compiled static build. Choose one of the following methods:
 
-### Option 1: Automatic Deployment via GitHub Actions (Recommended)
+### Method 1: Automatic Deployment with GitHub Actions (Recommended)
 
-1. Push or publish this repository to GitHub.
-2. In your GitHub repository, go to **Settings** &rarr; **Pages**.
-3. Under **Build and deployment** &rarr; **Source**, select **GitHub Actions**.
-4. Push any commit to the `main` or `master` branch (or go to **Actions** and click **Run workflow**).
-5. Your site will automatically build and publish to `https://<username>.github.io/<repo-name>/`.
+This compiles and publishes your app automatically on every push without having to manually build.
 
-### Option 2: Manual Deploy via Command Line
+1. In your GitHub repository, navigate to **Settings** &rarr; **Pages** (in the left sidebar).
+2. Under **Build and deployment** &rarr; **Source**, click the dropdown and choose **GitHub Actions** (instead of "Deploy from a branch").
+3. Go to the **Actions** tab in your repository, click the **Deploy to GitHub Pages** workflow on the left, and click **Run workflow** (or simply push a new commit to `main`).
+4. In ~60 seconds, your site will be live at `https://<username>.github.io/<repo-name>/`.
 
-If you prefer deploying to a `gh-pages` branch directly:
+---
+
+### Method 2: Deploy from the `/docs` Folder (No GitHub Actions needed)
+
+If you prefer using the standard **"Deploy from a branch"** option:
+
+1. Build the production files into the `/docs` folder:
+   ```bash
+   npm run build:docs
+   git add docs/
+   git commit -m "Build static site into docs"
+   git push origin main
+   ```
+2. In your repository, go to **Settings** &rarr; **Pages**.
+3. Under **Build and deployment**:
+   - **Source**: Select **Deploy from a branch**
+   - **Branch**: Select `main` (or `master`)
+   - **Folder**: Change from `/ (root)` to **`/docs`**
+   - Click **Save**.
+4. GitHub Pages will immediately serve the pre-compiled static app from the `/docs` folder.
+
+---
+
+### Method 3: Deploy to the `gh-pages` Branch via Command Line
 
 ```bash
-# 1. Install dependencies
-npm install
-
-# 2. Build and publish to the gh-pages branch
+# Build and push the dist folder to the gh-pages branch
 npm run deploy
 ```
-
-Then go to **Settings** &rarr; **Pages** in your repository and set the branch to `gh-pages` / `(root)`.
+Then in **Settings** &rarr; **Pages**, select branch `gh-pages` and folder `/ (root)`.
 
 ---
 
