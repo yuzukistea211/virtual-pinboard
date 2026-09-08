@@ -3,6 +3,65 @@
 :root {
   --app-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --app-font-scale: 1;
+  --theme-bg: #ffffff;
+  --theme-text: #171717;
+  --theme-text-muted: #737373;
+  --theme-border: #d4d4d4;
+  --theme-hover-overlay: rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme-tone="dark"] {
+  --theme-text: #f3f4f6;
+  --theme-text-muted: #9ca3af;
+  --theme-border: rgba(255, 255, 255, 0.2);
+  --theme-hover-overlay: rgba(255, 255, 255, 0.08);
+}
+
+/* Theme background class applied to all UI elements that previously had white backgrounds */
+.theme-ui-bg {
+  background-color: var(--theme-bg, #ffffff) !important;
+}
+
+/* Dark mode theme color adaptations for high contrast and readability */
+html[data-theme-tone="dark"] .theme-ui-bg {
+  color: var(--theme-text) !important;
+}
+
+html[data-theme-tone="dark"] .sticky-note-card {
+  border-color: var(--theme-border) !important;
+}
+
+html[data-theme-tone="dark"] .sticky-note-card > div:first-child {
+  border-bottom-color: var(--theme-border) !important;
+}
+
+html[data-theme-tone="dark"] .sticky-note-card textarea {
+  color: var(--theme-text) !important;
+  caret-color: var(--theme-text);
+}
+
+html[data-theme-tone="dark"] .sticky-note-card textarea::placeholder {
+  color: var(--theme-text-muted) !important;
+}
+
+html[data-theme-tone="dark"] .markdown-body,
+html[data-theme-tone="dark"] .markdown-body p,
+html[data-theme-tone="dark"] .markdown-body h1,
+html[data-theme-tone="dark"] .markdown-body h2,
+html[data-theme-tone="dark"] .markdown-body h3,
+html[data-theme-tone="dark"] .markdown-body li,
+html[data-theme-tone="dark"] .markdown-body blockquote {
+  color: var(--theme-text) !important;
+}
+
+html[data-theme-tone="dark"] .markdown-body h1 {
+  border-bottom-color: var(--theme-border) !important;
+}
+
+html[data-theme-tone="dark"] #draggable-note-spawner {
+  background-color: #ffffff !important;
+  color: #171717 !important;
+  border-color: #ffffff !important;
 }
 
 /* Global / All Interface font application */

@@ -277,8 +277,9 @@ export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
         width: `${localSize.width}px`,
         height: `${localSize.height}px`,
         zIndex: note.zIndex,
+        backgroundColor: 'var(--theme-bg, #ffffff)',
       }}
-      className={`sticky-note-card absolute top-0 left-0 bg-white border border-neutral-300 rounded-none shadow-xs transition-shadow duration-100 flex flex-col select-none group ${
+      className={`sticky-note-card absolute top-0 left-0 theme-ui-bg border border-neutral-300 rounded-none shadow-xs transition-shadow duration-100 flex flex-col select-none group ${
         isDragging
           ? 'shadow-xl ring-1 ring-neutral-400 cursor-grabbing'
           : isResizing
@@ -292,7 +293,10 @@ export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
       onClick={() => onBringToFront(note.id)}
     >
       {/* Top note bar: Drag grip, Mode Toggle (Edit / Preview), Cheatsheet, Delete button */}
-      <div className="flex items-center justify-between px-2 py-1 border-b border-neutral-200 bg-white cursor-grab active:cursor-grabbing">
+      <div
+        className="flex items-center justify-between px-2 py-1 border-b border-neutral-200 theme-ui-bg cursor-grab active:cursor-grabbing"
+        style={{ backgroundColor: 'var(--theme-bg, #ffffff)' }}
+      >
         <div className="flex items-center gap-1.5 text-neutral-400">
           <GripHorizontal className="w-3.5 h-3.5" />
 
@@ -349,7 +353,8 @@ export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
               <div
                 data-no-drag="true"
                 onClick={(e) => e.stopPropagation()}
-                className="absolute left-0 top-6 z-50 w-56 bg-white border border-neutral-300 shadow-lg p-2.5 text-[11px] text-neutral-700 space-y-1.5 select-text"
+                className="absolute left-0 top-6 z-50 w-56 theme-ui-bg border border-neutral-300 shadow-lg p-2.5 text-[11px] text-neutral-700 space-y-1.5 select-text"
+                style={{ backgroundColor: 'var(--theme-bg, #ffffff)' }}
               >
                 <div className="flex items-center justify-between pb-1 border-b border-neutral-200">
                   <span className="font-semibold text-neutral-900 text-xs">Markdown Syntax</span>

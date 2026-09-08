@@ -78,3 +78,15 @@ export interface FontSettings {
   sizeScale: number; // percentage (90, 100, 110, 120)
 }
 
+export interface ThemeColorPreset {
+  id: string;
+  name: string;
+  hex: string;
+  description?: string;
+  dark?: boolean;
+}
+
+export interface ThemeSettings {
+  themeColor: string; // HEX color code e.g. #ffffff
+}
+
