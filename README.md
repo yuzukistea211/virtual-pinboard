@@ -2,6 +2,9 @@
 
 A minimal, distraction-free pure white canvas to organize, edit, and drag-and-drop Markdown sticky notes with interactive task lists, local storage persistence, and JSON backup.
 
+
+**ALL OF THIS IS PURELY VIBE-CODED.**
+
 ---
 
 ## Features
