@@ -128,7 +128,7 @@ export const BoardSwitcher: React.FC<BoardSwitcherProps> = ({
         type="button"
         id="board-switcher-button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-2.5 py-1.5 bg-white hover:bg-neutral-50 active:bg-neutral-100 border border-neutral-300 shadow-sm text-neutral-900 transition-colors group cursor-pointer"
+        className="flex items-center gap-2 px-2.5 py-1.5 theme-ui-bg hover:opacity-95 active:opacity-90 border border-neutral-300 shadow-xs text-neutral-900 transition-colors group cursor-pointer"
         title="Switch or manage pinboards"
         aria-expanded={isOpen}
         aria-haspopup="true"
@@ -137,7 +137,7 @@ export const BoardSwitcher: React.FC<BoardSwitcherProps> = ({
         <span className="text-xs font-semibold text-neutral-900 max-w-[150px] truncate">
           {activeBoard.name}
         </span>
-        <span className="text-[10px] text-neutral-400 font-mono bg-neutral-100 px-1 py-0.2 border border-neutral-200">
+        <span className="text-[10px] text-neutral-400 font-mono bg-black/5 px-1 py-0.2 border border-neutral-200">
           {activeBoard.notes.length}
         </span>
         <ChevronDown
@@ -151,7 +151,7 @@ export const BoardSwitcher: React.FC<BoardSwitcherProps> = ({
       {isOpen && (
         <div
           id="board-switcher-dropdown"
-          className="absolute left-0 mt-1 w-72 bg-white border border-neutral-300 shadow-lg z-50 animate-in fade-in slide-in-from-top-1 duration-100"
+          className="absolute left-0 mt-1 w-72 theme-ui-bg border border-neutral-300 shadow-lg z-50 animate-in fade-in slide-in-from-top-1 duration-100"
         >
           {/* Menu Header */}
           <div className="flex items-center justify-between px-3 py-2 border-b border-neutral-200 bg-neutral-50">

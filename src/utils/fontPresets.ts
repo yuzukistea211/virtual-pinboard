@@ -100,17 +100,78 @@ export function loadWebFontStylesheet(id: string, url: string): Promise<void> {
 }
 
 /**
- * Register a local font face into the document via the FontFace API
+ * Extract clean single font family name without quotes or fallbacks for FontFace API
+ */
+export function extractCleanFamily(family: string): string {
+  if (!family) return 'CustomFont';
+  // Take first family before any comma fallback
+  const first = family.split(',')[0].trim();
+  // Strip surrounding quotes
+  return first.replace(/^["']|["']$/g, '').trim() || 'CustomFont';
+}
+
+/**
+ * Register a local font face into the document via both CSS @font-face and the FontFace API
  */
 export async function registerLocalFontFace(family: string, dataUrl: string): Promise<boolean> {
+  const cleanFamily = extractCleanFamily(family);
+  if (!cleanFamily || !dataUrl) return false;
+
+  // 1. Inject @font-face stylesheet directly into DOM for immediate, reliable CSS matching
+  const safeId = cleanFamily.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const styleId = `local-font-face-style-${safeId}`;
+  let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
+  if (!styleEl) {
+    styleEl = document.createElement('style');
+    styleEl.id = styleId;
+    document.head.appendChild(styleEl);
+  }
+  styleEl.textContent = `@font-face { font-family: "${cleanFamily}"; src: url("${dataUrl}"); font-display: swap; }`;
+
+  // 2. Also register into document.fonts using the FontFace API for programmatic canvas/DOM measurement
   try {
-    const fontFace = new FontFace(family, `url(${dataUrl})`);
+    // Check if already registered
+    const existing = Array.from(document.fonts).find(
+      (f) => extractCleanFamily(f.family) === cleanFamily && f.status === 'loaded'
+    );
+    if (existing) {
+      return true;
+    }
+
+    let fontFace: FontFace;
+    // Decode base64 to ArrayBuffer when possible for maximum sandbox/iframe compatibility
+    if (dataUrl.startsWith('data:')) {
+      try {
+        const parts = dataUrl.split(',');
+        if (parts.length > 1) {
+          const binaryStr = atob(parts[1]);
+          const len = binaryStr.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
+          }
+          fontFace = new FontFace(cleanFamily, bytes.buffer);
+        } else {
+          fontFace = new FontFace(cleanFamily, `url(${dataUrl})`);
+        }
+      } catch {
+        fontFace = new FontFace(cleanFamily, `url(${dataUrl})`);
+      }
+    } else {
+      fontFace = new FontFace(cleanFamily, `url(${dataUrl})`);
+    }
+
     const loaded = await fontFace.load();
     document.fonts.add(loaded);
+    try {
+      await document.fonts.ready;
+    } catch {
+      // safe fallback
+    }
     return true;
   } catch (err) {
-    console.warn(`Failed to register FontFace for ${family}:`, err);
-    return false;
+    console.warn(`FontFace API warning for ${cleanFamily} (DOM @font-face is active):`, err);
+    return true; // Still return true because DOM style rule is already active!
   }
 }
 

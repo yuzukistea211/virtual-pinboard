@@ -104,9 +104,24 @@ export function getLuminance(hex: string): number {
 
 /**
  * Determines whether a color is considered dark (requiring light foreground text).
+ * Threshold 0.45 covers all dark, charcoal, navy, deep wood, and muted dark shades.
  */
 export function isColorDark(hex: string): boolean {
-  return getLuminance(hex) < 0.38;
+  return getLuminance(hex) < 0.45;
+}
+
+/**
+ * Returns high-contrast text color for a given background color
+ */
+export function getContrastingTextColor(hex: string): string {
+  return isColorDark(hex) ? '#f8fafc' : '#1e293b';
+}
+
+/**
+ * Returns subtle border color matching the background luminance
+ */
+export function getContrastingBorderColor(hex: string): string {
+  return isColorDark(hex) ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.12)';
 }
 
 /**
@@ -144,17 +159,20 @@ export function applyThemeColorToDOM(hex: string) {
   const root = document.documentElement;
 
   root.style.setProperty('--theme-bg', valid);
+  root.style.setProperty('--ui-bg', valid);
   root.setAttribute('data-theme-tone', isDark ? 'dark' : 'light');
 
   if (isDark) {
     root.style.setProperty('--theme-text', '#f3f4f6');
     root.style.setProperty('--theme-text-muted', '#9ca3af');
     root.style.setProperty('--theme-border', 'rgba(255, 255, 255, 0.18)');
+    root.style.setProperty('--theme-surface', '#1f2937');
     root.style.setProperty('--theme-hover-overlay', 'rgba(255, 255, 255, 0.08)');
   } else {
     root.style.setProperty('--theme-text', '#171717');
     root.style.setProperty('--theme-text-muted', '#737373');
     root.style.setProperty('--theme-border', '#d4d4d4');
+    root.style.setProperty('--theme-surface', '#ffffff');
     root.style.setProperty('--theme-hover-overlay', 'rgba(0, 0, 0, 0.04)');
   }
 }

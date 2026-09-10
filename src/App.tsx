@@ -6,12 +6,16 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { usePinboard } from './hooks/usePinboard';
 import { useFontSettings } from './hooks/useFontSettings';
+import { useThemeSettings } from './hooks/useThemeSettings';
+import { useNoteColorPresets } from './hooks/useNoteColorPresets';
 import { StickyNoteCard } from './components/StickyNoteCard';
 import { MinimalDock } from './components/MinimalDock';
 import { BoardSwitcher } from './components/BoardSwitcher';
 import { FontSettingsModal } from './components/FontSettingsModal';
+import { ThemeSettingsModal } from './components/ThemeSettingsModal';
+import { NoteColorPresetsModal } from './components/NoteColorPresetsModal';
 import { DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT } from './constants';
-import { FileText, Type } from 'lucide-react';
+import { FileText } from 'lucide-react';
 
 export default function App() {
   const {
@@ -29,6 +33,7 @@ export default function App() {
     updateNoteContent,
     updateNotePosition,
     updateNoteSize,
+    updateNoteColor,
     bringToFront,
     deleteNote,
     clearBoard,
@@ -38,6 +43,12 @@ export default function App() {
 
   const fontManager = useFontSettings();
   const [isFontModalOpen, setIsFontModalOpen] = useState(false);
+
+  const themeManager = useThemeSettings();
+  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+
+  const noteColorManager = useNoteColorPresets();
+  const [isNoteColorModalOpen, setIsNoteColorModalOpen] = useState(false);
 
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -73,7 +84,8 @@ export default function App() {
       const dropX = Math.max(10, e.clientX - rect.left + scrollLeft - DEFAULT_NOTE_WIDTH / 2);
       const dropY = Math.max(10, e.clientY - rect.top + scrollTop - 20);
 
-      addNote(dropX, dropY, DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT);
+      const defaultColor = noteColorManager.presets[0]?.hex || '#ffffff';
+      addNote(dropX, dropY, DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT, defaultColor);
     };
 
     window.addEventListener('pointermove', handlePointerMove);
@@ -85,16 +97,14 @@ export default function App() {
       window.removeEventListener('pointerup', handlePointerUp);
       window.removeEventListener('pointercancel', handlePointerUp);
     };
-  }, [isDraggingNewNote, addNote]);
+  }, [isDraggingNewNote, addNote, noteColorManager.presets]);
 
   return (
     <main
       ref={canvasRef}
       id="canvas-container"
-      className={`relative w-screen h-screen overflow-auto bg-white select-none cursor-default transition-[filter,opacity] duration-200 ${
-        isFontModalOpen ? 'blur-[1px] pointer-events-none select-none' : ''
-      }`}
-      style={{ backgroundColor: '#ffffff' }}
+      className="relative w-screen h-screen overflow-auto theme-ui-bg select-none cursor-default transition-colors duration-150"
+      style={{ backgroundColor: 'var(--ui-bg, var(--theme-bg, #ffffff))' }}
     >
       {/* Top Header: Brand & Pinboard Selector */}
       <header className="fixed top-3 left-4 z-50 flex items-center gap-3 select-none">
@@ -121,21 +131,6 @@ export default function App() {
         </span>
       </header>
 
-      {/* Top Right: Font Settings Control */}
-      <div className="fixed top-3 right-4 z-50 flex items-center gap-2 select-none">
-        <button
-          type="button"
-          id="btn-open-font-settings"
-          onClick={() => setIsFontModalOpen(true)}
-          className="flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-neutral-50 active:bg-neutral-100 text-neutral-800 border border-neutral-300 shadow-2xs text-xs font-medium transition-colors"
-          title={`Interface font: ${fontManager.activeFont.name}. Click to change or import font.`}
-        >
-          <Type className="w-3.5 h-3.5 text-neutral-600" />
-          <span className="hidden sm:inline text-neutral-400 font-normal">Font:</span>
-          <span className="font-semibold max-w-[130px] truncate">{fontManager.activeFont.name}</span>
-        </button>
-      </div>
-
       {/* Empty State when no notes are on the current board */}
       {notes.length === 0 && (
         <div
@@ -160,9 +155,12 @@ export default function App() {
           <StickyNoteCard
             key={note.id}
             note={note}
+            colorPresets={noteColorManager.presets}
+            onOpenColorPresetsModal={() => setIsNoteColorModalOpen(true)}
             onUpdateContent={updateNoteContent}
             onUpdatePosition={updateNotePosition}
             onUpdateSize={updateNoteSize}
+            onUpdateColor={updateNoteColor}
             onDelete={deleteNote}
             onBringToFront={bringToFront}
           />
@@ -203,7 +201,10 @@ export default function App() {
         onImport={importBoardJSON}
         onClear={clearBoard}
         onOpenFontSettings={() => setIsFontModalOpen(true)}
+        onOpenThemeSettings={() => setIsThemeModalOpen(true)}
+        onOpenNoteColorPresets={() => setIsNoteColorModalOpen(true)}
         activeFontName={fontManager.activeFont.name}
+        activeThemeColor={themeManager.themeColor}
         isDraggingNewNote={isDraggingNewNote}
       />
 
@@ -223,6 +224,29 @@ export default function App() {
         onImportWebFont={fontManager.importWebFont}
         onRemoveCustomFont={fontManager.removeCustomFont}
         onResetToDefault={fontManager.resetToDefault}
+      />
+
+      {/* UI Background Theme Settings Modal */}
+      <ThemeSettingsModal
+        isOpen={isThemeModalOpen}
+        onClose={() => setIsThemeModalOpen(false)}
+        themeColor={themeManager.themeColor}
+        onSelectColor={themeManager.setThemeColor}
+        onResetColor={themeManager.resetThemeColor}
+        presets={themeManager.presets}
+        activePreset={themeManager.activePreset}
+        isDark={themeManager.isDark}
+      />
+
+      {/* Note Color Presets Customizer Modal */}
+      <NoteColorPresetsModal
+        isOpen={isNoteColorModalOpen}
+        onClose={() => setIsNoteColorModalOpen(false)}
+        presets={noteColorManager.presets}
+        onUpdatePreset={noteColorManager.updatePreset}
+        onAddPreset={noteColorManager.addPreset}
+        onDeletePreset={noteColorManager.deletePreset}
+        onResetToDefaults={noteColorManager.resetToDefaults}
       />
     </main>
   );

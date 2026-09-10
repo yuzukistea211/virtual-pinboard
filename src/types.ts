@@ -1,4 +1,22 @@
-export type NoteColorId = 'yellow' | 'green' | 'pink' | 'blue' | 'purple' | 'white';
+export type NoteColorId =
+  | 'white'
+  | 'yellow'
+  | 'canary'
+  | 'green'
+  | 'blue'
+  | 'purple'
+  | 'pink'
+  | 'peach'
+  | 'slate'
+  | 'dark'
+  | 'custom';
+
+export interface NoteColorPreset {
+  id: string;
+  name: string;
+  hex: string;
+  isDark?: boolean;
+}
 
 export interface NoteColorConfig {
   id: NoteColorId;
@@ -17,7 +35,7 @@ export interface StickyNote {
   y: number;
   width: number;
   height: number;
-  color?: string;
+  color?: string; // Hex color code e.g. '#ffffff' or '#fef08a' or custom hex
   zIndex: number;
   createdAt: number;
   updatedAt: number;

@@ -34,9 +34,10 @@ function openDatabase(): Promise<IDBDatabase> {
 }
 
 /**
- * Retrieve all custom fonts from IndexedDB, falling back to localStorage
+ * Retrieve all custom fonts from IndexedDB, merged with localStorage
  */
 export async function getStoredCustomFonts(): Promise<CustomFontRecord[]> {
+  const localFonts = getCustomFontsFromLocalStorage();
   try {
     const db = await openDatabase();
     return new Promise((resolve) => {
@@ -45,21 +46,43 @@ export async function getStoredCustomFonts(): Promise<CustomFontRecord[]> {
       const request = store.getAll();
 
       request.onsuccess = () => {
-        resolve(request.result as CustomFontRecord[]);
+        const idbFonts = (request.result as CustomFontRecord[]) || [];
+        // Merge by ID, preferring whichever has fileData
+        const map = new Map<string, CustomFontRecord>();
+        for (const f of localFonts) {
+          map.set(f.id, f);
+        }
+        for (const f of idbFonts) {
+          const existing = map.get(f.id);
+          if (!existing || (!existing.fileData && f.fileData)) {
+            map.set(f.id, f);
+          }
+        }
+        resolve(Array.from(map.values()));
       };
       request.onerror = () => {
-        resolve(getCustomFontsFromLocalStorage());
+        resolve(localFonts);
       };
     });
   } catch {
-    return getCustomFontsFromLocalStorage();
+    return localFonts;
   }
 }
 
 /**
- * Save a custom font record into persistent storage
+ * Synchronous retrieval of cached custom fonts from localStorage
+ */
+export function getStoredCustomFontsSync(): CustomFontRecord[] {
+  return getCustomFontsFromLocalStorage();
+}
+
+/**
+ * Save a custom font record into persistent storage (IndexedDB + localStorage fallback)
  */
 export async function saveStoredCustomFont(font: CustomFontRecord): Promise<void> {
+  // Always mirror to localStorage for instantaneous synchronous access on reload
+  saveCustomFontToLocalStorage(font);
+
   try {
     const db = await openDatabase();
     await new Promise<void>((resolve, reject) => {
@@ -70,8 +93,8 @@ export async function saveStoredCustomFont(font: CustomFontRecord): Promise<void
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
-  } catch {
-    saveCustomFontToLocalStorage(font);
+  } catch (err) {
+    console.warn('Could not store font in IndexedDB, saved to localStorage', err);
   }
 }
 
@@ -79,6 +102,8 @@ export async function saveStoredCustomFont(font: CustomFontRecord): Promise<void
  * Delete a custom font by ID from storage
  */
 export async function deleteStoredCustomFont(id: string): Promise<void> {
+  deleteCustomFontFromLocalStorage(id);
+
   try {
     const db = await openDatabase();
     await new Promise<void>((resolve, reject) => {
@@ -89,8 +114,8 @@ export async function deleteStoredCustomFont(id: string): Promise<void> {
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
-  } catch {
-    deleteCustomFontFromLocalStorage(id);
+  } catch (err) {
+    console.warn('Could not delete font from IndexedDB', err);
   }
 }
 
@@ -108,6 +133,11 @@ function getCustomFontsFromLocalStorage(): CustomFontRecord[] {
 
 function saveCustomFontToLocalStorage(font: CustomFontRecord): void {
   try {
+    // Only mirror fonts with smaller payloads (< 1.5MB) to localStorage because localStorage is capped at ~5MB total
+    // Larger font files are safely persisted in IndexedDB
+    if (font.fileData && font.fileData.length > 1_500_000) {
+      return;
+    }
     const existing = getCustomFontsFromLocalStorage();
     const filtered = existing.filter((f) => f.id !== font.id);
     filtered.push(font);

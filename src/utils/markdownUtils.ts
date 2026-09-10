@@ -16,7 +16,7 @@ export function toggleTaskInMarkdown(content: string, targetIndex: number): stri
   });
 }
 
-export type MarkdownFormatType = 'bold' | 'italic' | 'heading' | 'task' | 'list' | 'code';
+export type MarkdownFormatType = 'bold' | 'italic' | 'heading' | 'task' | 'list' | 'code' | 'highlight';
 
 export function applyMarkdownFormat(
   content: string,
@@ -29,6 +29,13 @@ export function applyMarkdownFormat(
   const after = content.substring(selectionEnd);
 
   switch (formatType) {
+    case 'highlight': {
+      const wrapped = `==${selectedText || 'highlighted text'}==`;
+      const newText = before + wrapped + after;
+      const start = selectionStart + 2;
+      const end = selectionStart + wrapped.length - 2;
+      return { newText, newCursorStart: start, newCursorEnd: end };
+    }
     case 'bold': {
       const wrapped = `**${selectedText || 'bold text'}**`;
       const newText = before + wrapped + after;

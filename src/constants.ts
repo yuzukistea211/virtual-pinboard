@@ -1,4 +1,4 @@
-import { StickyNote, Pinboard } from './types';
+import { StickyNote, Pinboard, NoteColorPreset } from './types';
 
 export const STORAGE_KEY = 'pinboard_notes_storage_v2';
 export const BOARDS_STORAGE_KEY = 'pinboards_storage_v1';
@@ -8,6 +8,68 @@ export const DEFAULT_NOTE_WIDTH = 240;
 export const DEFAULT_NOTE_HEIGHT = 200;
 export const MIN_NOTE_WIDTH = 160;
 export const MIN_NOTE_HEIGHT = 120;
+
+export const DEFAULT_NOTE_COLOR = '#ffffff';
+
+export const NOTE_COLOR_PRESETS: NoteColorPreset[] = [
+  {
+    id: 'white',
+    name: 'Crisp White',
+    hex: '#ffffff',
+  },
+  {
+    id: 'canary-yellow',
+    name: 'Canary Yellow',
+    hex: '#fef08a',
+  },
+  {
+    id: 'pastel-yellow',
+    name: 'Pastel Butter',
+    hex: '#fef9c3',
+  },
+  {
+    id: 'mint-green',
+    name: 'Mint Green',
+    hex: '#dcfce7',
+  },
+  {
+    id: 'sky-blue',
+    name: 'Sky Blue',
+    hex: '#e0f2fe',
+  },
+  {
+    id: 'lavender',
+    name: 'Lavender Dusk',
+    hex: '#f3e8ff',
+  },
+  {
+    id: 'rose-pink',
+    name: 'Rose Blossom',
+    hex: '#ffe4e6',
+  },
+  {
+    id: 'peach-apricot',
+    name: 'Warm Peach',
+    hex: '#ffedd5',
+  },
+  {
+    id: 'neutral-slate',
+    name: 'Soft Stone',
+    hex: '#f1f5f9',
+  },
+  {
+    id: 'charcoal-dark',
+    name: 'Dark Slate',
+    hex: '#334155',
+    isDark: true,
+  },
+  {
+    id: 'obsidian-dark',
+    name: 'Obsidian Noir',
+    hex: '#1e293b',
+    isDark: true,
+  },
+];
 
 export const INITIAL_NOTES: StickyNote[] = [
   {

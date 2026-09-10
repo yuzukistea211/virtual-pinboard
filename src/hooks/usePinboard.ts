@@ -32,7 +32,7 @@ export function usePinboard() {
             notes: Array.isArray(b.notes)
               ? b.notes.map((n: any) => ({
                   ...n,
-                  color: 'white',
+                  color: typeof n.color === 'string' && n.color ? n.color : '#ffffff',
                   width: typeof n.width === 'number' && n.width >= MIN_NOTE_WIDTH ? n.width : DEFAULT_NOTE_WIDTH,
                   height: typeof n.height === 'number' && n.height >= MIN_NOTE_HEIGHT ? n.height : DEFAULT_NOTE_HEIGHT,
                 }))
@@ -48,7 +48,7 @@ export function usePinboard() {
         if (Array.isArray(parsedLegacy) && parsedLegacy.length > 0) {
           const migratedNotes = parsedLegacy.map((n: any) => ({
             ...n,
-            color: 'white',
+            color: typeof n.color === 'string' && n.color ? n.color : '#ffffff',
             width: typeof n.width === 'number' && n.width >= MIN_NOTE_WIDTH ? n.width : DEFAULT_NOTE_WIDTH,
             height: typeof n.height === 'number' && n.height >= MIN_NOTE_HEIGHT ? n.height : DEFAULT_NOTE_HEIGHT,
           }));
@@ -273,7 +273,13 @@ export function usePinboard() {
   }, [updateActiveNotes]);
 
   const addNote = useCallback(
-    (x?: number, y?: number, width: number = DEFAULT_NOTE_WIDTH, height: number = DEFAULT_NOTE_HEIGHT) => {
+    (
+      x?: number,
+      y?: number,
+      width: number = DEFAULT_NOTE_WIDTH,
+      height: number = DEFAULT_NOTE_HEIGHT,
+      color?: string
+    ) => {
       maxZIndexRef.current += 1;
       const newZ = maxZIndexRef.current;
 
@@ -296,7 +302,7 @@ export function usePinboard() {
         y: Math.max(0, Math.round(posY)),
         width: Math.max(MIN_NOTE_WIDTH, width),
         height: Math.max(MIN_NOTE_HEIGHT, height),
-        color: 'white',
+        color: color || '#ffffff',
         zIndex: newZ,
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -307,6 +313,14 @@ export function usePinboard() {
     },
     [updateActiveNotes]
   );
+
+  const updateNoteColor = useCallback((id: string, color: string) => {
+    updateActiveNotes((prev) =>
+      prev.map((note) =>
+        note.id === id ? { ...note, color, updatedAt: Date.now() } : note
+      )
+    );
+  }, [updateActiveNotes]);
 
   const updateNoteContent = useCallback((id: string, content: string) => {
     updateActiveNotes((prev) =>
@@ -416,7 +430,7 @@ export function usePinboard() {
                     y: typeof n.y === 'number' && !isNaN(n.y) ? Math.max(0, n.y) : 50,
                     width: typeof n.width === 'number' && n.width >= MIN_NOTE_WIDTH ? n.width : DEFAULT_NOTE_WIDTH,
                     height: typeof n.height === 'number' && n.height >= MIN_NOTE_HEIGHT ? n.height : DEFAULT_NOTE_HEIGHT,
-                    color: 'white',
+                    color: typeof n.color === 'string' && n.color ? n.color : '#ffffff',
                     zIndex: typeof n.zIndex === 'number' ? n.zIndex : nIdx + 1,
                     createdAt: typeof n.createdAt === 'number' ? n.createdAt : Date.now(),
                     updatedAt: Date.now(),
@@ -456,7 +470,7 @@ export function usePinboard() {
             y: typeof n.y === 'number' && !isNaN(n.y) ? Math.max(0, n.y) : 50 + (idx % 10) * 30,
             width: typeof n.width === 'number' && n.width >= MIN_NOTE_WIDTH ? n.width : DEFAULT_NOTE_WIDTH,
             height: typeof n.height === 'number' && n.height >= MIN_NOTE_HEIGHT ? n.height : DEFAULT_NOTE_HEIGHT,
-            color: 'white',
+            color: typeof n.color === 'string' && n.color ? n.color : '#ffffff',
             zIndex: typeof n.zIndex === 'number' ? n.zIndex : idx + 1,
             createdAt: typeof n.createdAt === 'number' ? n.createdAt : Date.now(),
             updatedAt: Date.now(),
@@ -498,6 +512,7 @@ export function usePinboard() {
     deleteBoard,
     duplicateBoard,
     addNote,
+    updateNoteColor,
     updateNoteContent,
     updateNotePosition,
     updateNoteSize,

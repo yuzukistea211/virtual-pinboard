@@ -8,13 +8,11 @@ import {
   Trash2,
   Check,
   RotateCcw,
-  Sparkles,
   FileCode,
   Sliders,
   AlertCircle,
 } from 'lucide-react';
 import { FontOption, FontApplyScope } from '../types';
-import { POPULAR_GOOGLE_FONTS_SUGGESTIONS } from '../utils/fontPresets';
 
 interface FontSettingsModalProps {
   isOpen: boolean;
@@ -161,20 +159,10 @@ export const FontSettingsModal: React.FC<FontSettingsModalProps> = ({
     }
   };
 
-  const handleQuickSuggestion = (fontName: string) => {
-    setWebFontInput(fontName);
-    setCustomWebFontName(fontName);
-    setActiveTab('import-web');
-  };
-
   const modalContent = (
     <div
       id="font-settings-backdrop"
-      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-neutral-950/45 backdrop-blur-md select-none transition-all duration-150 animate-in fade-in"
-      style={{
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-      }}
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/25 select-none transition-all duration-150 animate-in fade-in"
       onClick={onClose}
     >
       <div
@@ -183,7 +171,8 @@ export const FontSettingsModal: React.FC<FontSettingsModalProps> = ({
         aria-modal="true"
         aria-label="Font and Typography Settings"
         onClick={(e) => e.stopPropagation()}
-        className="relative z-[10001] w-full max-w-2xl max-h-[90vh] bg-white border border-neutral-300 shadow-2xl flex flex-col overflow-hidden text-neutral-900 animate-in zoom-in-95 duration-150"
+        className="relative z-[10001] w-full max-w-2xl max-h-[90vh] theme-ui-bg border border-neutral-300 shadow-2xl flex flex-col overflow-hidden text-neutral-900 animate-in zoom-in-95 duration-150"
+        style={{ backgroundColor: 'var(--ui-bg, var(--theme-bg, #ffffff))' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 bg-neutral-50/50">
@@ -480,7 +469,7 @@ export const FontSettingsModal: React.FC<FontSettingsModalProps> = ({
                       Drag and drop your font file here, or <span className="underline">browse</span>
                     </p>
                     <p className="text-[11px] text-neutral-400 mt-0.5">
-                      Supports TrueType (.ttf), OpenType (.otf), and Web Open (.woff, .woff2)
+                      Supports TrueType (.ttf), OpenType (.otf), and Web Open (.woff, .woff2) up to 50MB
                     </p>
                   </div>
                 )}
@@ -557,26 +546,6 @@ export const FontSettingsModal: React.FC<FontSettingsModalProps> = ({
                   </code>{' '}
                   statement, or a Google Font name. The declared font-family will be automatically detected.
                 </p>
-              </div>
-
-              {/* Quick suggestions */}
-              <div className="space-y-1.5">
-                <span className="text-[11px] font-medium text-neutral-600 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-neutral-500" />
-                  Popular Recommendations (Click to use):
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {POPULAR_GOOGLE_FONTS_SUGGESTIONS.map((item) => (
-                    <button
-                      type="button"
-                      key={item.name}
-                      onClick={() => handleQuickSuggestion(item.name)}
-                      className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-[11px] border border-neutral-200 transition-colors"
-                    >
-                      {item.name} <span className="text-neutral-400 text-[10px]">({item.category})</span>
-                    </button>
-                  ))}
-                </div>
               </div>
 
               <div className="space-y-1.5">
@@ -669,20 +638,40 @@ export const FontSettingsModal: React.FC<FontSettingsModalProps> = ({
             </div>
 
             {/* Size Scale */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-semibold text-neutral-800">
                   Text Size Scale:
                 </label>
-                <span className="text-[11px] font-mono text-neutral-500">{sizeScale}%</span>
+                <span className="text-[11px] font-mono px-1.5 py-0.5 bg-neutral-100 border border-neutral-200 text-neutral-800 font-semibold">
+                  {sizeScale}%
+                </span>
               </div>
-              <div className="grid grid-cols-4 gap-1">
-                {[90, 100, 110, 120].map((scale) => (
+              
+              {/* Slider for smooth adjustment */}
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-neutral-400 font-mono">75%</span>
+                <input
+                  type="range"
+                  min="75"
+                  max="150"
+                  step="5"
+                  value={sizeScale}
+                  onChange={(e) => onSetSizeScale(Number(e.target.value))}
+                  className="flex-1 accent-neutral-900 cursor-pointer h-1.5 bg-neutral-200"
+                  aria-label="Text font size scale slider"
+                />
+                <span className="text-[10px] text-neutral-400 font-mono">150%</span>
+              </div>
+
+              {/* Quick preset buttons */}
+              <div className="grid grid-cols-6 gap-1">
+                {[80, 90, 100, 110, 125, 140].map((scale) => (
                   <button
                     type="button"
                     key={scale}
                     onClick={() => onSetSizeScale(scale)}
-                    className={`py-1.5 text-xs font-medium border transition-colors ${
+                    className={`py-1 text-[11px] font-medium border transition-colors ${
                       sizeScale === scale
                         ? 'border-neutral-900 bg-neutral-900 text-white'
                         : 'border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-100'

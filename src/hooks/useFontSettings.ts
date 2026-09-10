@@ -4,6 +4,7 @@ import {
   getStoredFontSettings,
   saveStoredFontSettings,
   getStoredCustomFonts,
+  getStoredCustomFontsSync,
   saveStoredCustomFont,
   deleteStoredCustomFont,
   DEFAULT_FONT_SETTINGS,
@@ -18,7 +19,19 @@ import {
 
 export function useFontSettings() {
   const [settings, setSettings] = useState<FontSettings>(() => getStoredFontSettings());
-  const [customRecords, setCustomRecords] = useState<CustomFontRecord[]>([]);
+  const [customRecords, setCustomRecords] = useState<CustomFontRecord[]>(() => {
+    const syncRecords = getStoredCustomFontsSync();
+    if (typeof window !== 'undefined') {
+      for (const record of syncRecords) {
+        if (record.sourceType === 'file' && record.fileData) {
+          registerLocalFontFace(record.fontFamily, record.fileData);
+        } else if (record.sourceType === 'web' && record.webUrl) {
+          loadWebFontStylesheet(record.id, record.webUrl);
+        }
+      }
+    }
+    return syncRecords;
+  });
   const [isReady, setIsReady] = useState(false);
 
   // Load custom fonts on mount
@@ -180,11 +193,11 @@ export function useFontSettings() {
         };
       }
 
-      // Max size limit: 10MB
-      if (file.size > 10 * 1024 * 1024) {
+      // Max size limit: 50MB (expanded from 10MB)
+      if (file.size > 50 * 1024 * 1024) {
         return {
           success: false,
-          error: 'Font file size is too large (max 10MB)',
+          error: 'Font file size is too large (max 50MB)',
         };
       }
 

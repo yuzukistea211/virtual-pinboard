@@ -72,13 +72,13 @@ export const ThemeSettingsModal: React.FC<ThemeSettingsModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="theme-modal-title"
-      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-100"
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/25 animate-in fade-in duration-100"
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         className="relative z-[10001] w-full max-w-lg max-h-[90vh] theme-ui-bg border border-neutral-300 shadow-2xl flex flex-col overflow-hidden text-neutral-900 animate-in zoom-in-95 duration-150"
-        style={{ backgroundColor: 'var(--theme-bg, #ffffff)' }}
+        style={{ backgroundColor: 'var(--ui-bg, var(--theme-bg, #ffffff))' }}
       >
         {/* Modal Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 shrink-0">
@@ -88,10 +88,10 @@ export const ThemeSettingsModal: React.FC<ThemeSettingsModalProps> = ({
             </div>
             <div>
               <h2 id="theme-modal-title" className="text-sm font-bold tracking-tight">
-                Theme Color
+                UI Background Theme
               </h2>
               <p className="text-[11px] text-neutral-500">
-                Change the background of the canvas, sticky notes, and UI controls.
+                Change the background of the canvas, dock, and menus. Sticky notes retain their own colors.
               </p>
             </div>
           </div>
@@ -110,43 +110,46 @@ export const ThemeSettingsModal: React.FC<ThemeSettingsModalProps> = ({
           {/* Live Preview Card */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs font-semibold text-neutral-700">
-              <span>Live Preview</span>
+              <span>UI Canvas Preview</span>
               <span className="text-[11px] font-mono text-neutral-500">
                 {activePreset ? activePreset.name : 'Custom Color'} ({themeColor})
               </span>
             </div>
 
             <div
-              className="p-3 border border-neutral-300 rounded-none shadow-inner transition-colors duration-150 flex flex-col gap-2.5 min-h-[110px] justify-center"
+              className="p-4 border border-neutral-300 rounded-none shadow-inner transition-colors duration-150 flex items-center justify-center gap-3 min-h-[120px]"
               style={{ backgroundColor: themeColor }}
             >
-              {/* Mini Sticky Note Mockup */}
+              {/* Mini White Sticky Note Mockup */}
               <div
-                className="w-full max-w-xs mx-auto border border-neutral-300 shadow-xs p-2 text-xs flex flex-col gap-1 transition-colors"
-                style={{
-                  backgroundColor: themeColor,
-                  color: isDark ? '#f3f4f6' : '#171717',
-                  borderColor: isDark ? 'rgba(255,255,255,0.2)' : '#d4d4d4',
-                }}
+                className="w-36 bg-white border border-neutral-300 shadow-md p-2 text-xs flex flex-col gap-1 transition-transform hover:-translate-y-0.5"
+                style={{ color: '#171717' }}
               >
-                <div
-                  className="flex items-center justify-between pb-1 border-b border-neutral-200/80 text-[10px]"
-                  style={{ borderColor: isDark ? 'rgba(255,255,255,0.15)' : '#e5e5e5' }}
-                >
-                  <div className="flex items-center gap-1 font-semibold">
-                    <FileText className="w-3 h-3" />
-                    <span>Project Priorities</span>
-                  </div>
-                  <span className="text-[9px] opacity-60">Markdown</span>
+                <div className="flex items-center justify-between pb-1 border-b border-neutral-200 text-[10px] text-neutral-500">
+                  <span className="font-semibold text-neutral-900">White Note</span>
+                  <span className="text-[9px]">#FFF</span>
                 </div>
-                <div className="space-y-1 text-[11px] leading-tight">
-                  <div className="flex items-center gap-1.5">
-                    <CheckSquare className="w-3 h-3 text-neutral-900" style={{ color: isDark ? '#f3f4f6' : '#171717' }} />
-                    <span className="line-through opacity-70">Review architectural plan</span>
+                <div className="space-y-1 text-[10px] leading-tight text-neutral-700">
+                  <div className="flex items-center gap-1">
+                    <CheckSquare className="w-3 h-3 text-neutral-900" />
+                    <span>Independent note</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 border border-neutral-400 shrink-0" />
-                    <span>Deliver release sprint</span>
+                </div>
+              </div>
+
+              {/* Mini Yellow Sticky Note Mockup */}
+              <div
+                className="w-36 bg-[#fef08a] border border-amber-300 shadow-md p-2 text-xs flex flex-col gap-1 transition-transform hover:-translate-y-0.5"
+                style={{ color: '#171717' }}
+              >
+                <div className="flex items-center justify-between pb-1 border-b border-amber-300 text-[10px] text-neutral-700">
+                  <span className="font-semibold text-neutral-900">Canary Note</span>
+                  <span className="text-[9px]">Custom</span>
+                </div>
+                <div className="space-y-1 text-[10px] leading-tight text-neutral-800">
+                  <div className="flex items-center gap-1">
+                    <div className="w-2.5 h-2.5 border border-neutral-600 shrink-0" />
+                    <span>Retains its color</span>
                   </div>
                 </div>
               </div>

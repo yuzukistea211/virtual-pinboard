@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Download, Upload, Trash2, Check, FileText, Type } from 'lucide-react';
+import { Download, Upload, Trash2, Check, FileText, Type, Palette } from 'lucide-react';
 
 interface MinimalDockProps {
   noteCount: number;
@@ -10,7 +10,10 @@ interface MinimalDockProps {
   onImport: (file: File) => Promise<{ success: boolean; count?: number; error?: string }>;
   onClear: () => void;
   onOpenFontSettings?: () => void;
+  onOpenThemeSettings?: () => void;
+  onOpenNoteColorPresets?: () => void;
   activeFontName?: string;
+  activeThemeColor?: string;
   isDraggingNewNote?: boolean;
 }
 
@@ -22,7 +25,10 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
   onImport,
   onClear,
   onOpenFontSettings,
+  onOpenThemeSettings,
+  onOpenNoteColorPresets,
   activeFontName,
+  activeThemeColor,
   isDraggingNewNote,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -59,7 +65,7 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
       {/* Floating Bottom Center Minimal Toolbar */}
       <nav
         aria-label="Pinboard actions"
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-3 py-1.5 bg-white border border-neutral-300 shadow-md text-neutral-800 select-none transition-all duration-150"
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-3 py-1.5 theme-ui-bg border border-neutral-300 shadow-md text-neutral-800 select-none transition-all duration-150"
       >
         {/* Draggable Note Element (not a button, dragged directly to canvas) */}
         <div
@@ -81,7 +87,7 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
           type="button"
           id="btn-export-json"
           onClick={onExport}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 hover:bg-neutral-100 active:bg-neutral-200 text-neutral-700 hover:text-neutral-900 text-xs font-medium transition-colors"
+          className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-black/5 active:bg-black/10 text-neutral-700 hover:text-neutral-950 text-xs font-medium transition-colors"
           title="Download JSON backup"
         >
           <Download className="w-3.5 h-3.5" />
@@ -93,7 +99,7 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
           type="button"
           id="btn-import-json"
           onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 hover:bg-neutral-100 active:bg-neutral-200 text-neutral-700 hover:text-neutral-900 text-xs font-medium transition-colors"
+          className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-black/5 active:bg-black/10 text-neutral-700 hover:text-neutral-950 text-xs font-medium transition-colors"
           title="Restore board from JSON backup"
         >
           <Upload className="w-3.5 h-3.5" />
@@ -106,11 +112,42 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
             type="button"
             id="btn-font-settings-dock"
             onClick={onOpenFontSettings}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 hover:bg-neutral-100 active:bg-neutral-200 text-neutral-700 hover:text-neutral-900 text-xs font-medium transition-colors"
+            className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-black/5 active:bg-black/10 text-neutral-700 hover:text-neutral-950 text-xs font-medium transition-colors"
             title={`Font settings: ${activeFontName || 'Default'}`}
           >
             <Type className="w-3.5 h-3.5 text-neutral-600" />
             <span className="hidden sm:inline">Font</span>
+          </button>
+        )}
+
+        {/* Theme Background Setting Button */}
+        {onOpenThemeSettings && (
+          <button
+            type="button"
+            id="btn-theme-settings-dock"
+            onClick={onOpenThemeSettings}
+            className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-black/5 active:bg-black/10 text-neutral-700 hover:text-neutral-950 text-xs font-medium transition-colors"
+            title="UI theme background color"
+          >
+            <span
+              className="w-3 h-3 rounded-full border border-neutral-400 shadow-2xs shrink-0"
+              style={{ backgroundColor: activeThemeColor || 'var(--ui-bg, #ffffff)' }}
+            />
+            <span className="hidden sm:inline">Theme</span>
+          </button>
+        )}
+
+        {/* Note Color Presets Button */}
+        {onOpenNoteColorPresets && (
+          <button
+            type="button"
+            id="btn-note-colors-dock"
+            onClick={onOpenNoteColorPresets}
+            className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-black/5 active:bg-black/10 text-neutral-700 hover:text-neutral-950 text-xs font-medium transition-colors"
+            title="Customize note color presets"
+          >
+            <Palette className="w-3.5 h-3.5 text-neutral-600" />
+            <span className="hidden sm:inline">Note Colors</span>
           </button>
         )}
 
