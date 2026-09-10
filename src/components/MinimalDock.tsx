@@ -71,13 +71,12 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
         <div
           id="draggable-note-spawner"
           onPointerDown={onStartDragNewNote}
-          className={`flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-950 text-white cursor-grab active:cursor-grabbing text-xs font-medium border border-neutral-900 select-none transition-all ${
+          className={`flex items-center gap-1.5 px-4 py-1.5 bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-950 text-white cursor-grab active:cursor-grabbing text-xs font-medium border border-neutral-900 select-none transition-all ${
             isDraggingNewNote ? 'opacity-40 ring-2 ring-neutral-400' : ''
           }`}
           title="Click and drag onto canvas to place a new note"
         >
           <FileText className="w-3.5 h-3.5" />
-          <span>+ Drag Note</span>
         </div>
 
         <div className="h-4 w-px bg-neutral-200 mx-0.5" />
@@ -91,7 +90,6 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
           title="Download JSON backup"
         >
           <Download className="w-3.5 h-3.5" />
-          <span>Export</span>
         </button>
 
         {/* Import JSON Button */}
@@ -103,7 +101,6 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
           title="Restore board from JSON backup"
         >
           <Upload className="w-3.5 h-3.5" />
-          <span>Import</span>
         </button>
 
         {/* Font Customization Button */}
@@ -116,7 +113,7 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
             title={`Font settings: ${activeFontName || 'Default'}`}
           >
             <Type className="w-3.5 h-3.5 text-neutral-600" />
-            <span className="hidden sm:inline">Font</span>
+            
           </button>
         )}
 
@@ -133,7 +130,6 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
               className="w-3 h-3 rounded-full border border-neutral-400 shadow-2xs shrink-0"
               style={{ backgroundColor: activeThemeColor || 'var(--ui-bg, #ffffff)' }}
             />
-            <span className="hidden sm:inline">Theme</span>
           </button>
         )}
 
@@ -147,7 +143,6 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
             title="Customize note color presets"
           >
             <Palette className="w-3.5 h-3.5 text-neutral-600" />
-            <span className="hidden sm:inline">Note Colors</span>
           </button>
         )}
 
@@ -195,7 +190,7 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
         {/* Note Counter & Save Status */}
         <div className="flex items-center gap-1.5 px-1.5 text-[11px] text-neutral-500">
           {boardName && (
-            <span className="font-medium text-neutral-700 max-w-[100px] truncate hidden md:inline-block">
+            <span className="font-medium text-neutral-700 max-w-[250px] truncate hidden md:inline-block">
               {boardName} &bull;
             </span>
           )}

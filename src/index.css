@@ -301,3 +301,26 @@ html[data-font-scope="all"] body {
 .markdown-body :not(pre) > code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
 }
+
+/* Thin black scrollbar */
+::-webkit-scrollbar {
+  width: 1px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #000;
+  border-radius: 0;
+}
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #000 transparent;
+}
