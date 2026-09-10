@@ -302,23 +302,8 @@ html[data-font-scope="all"] body {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
 }
 
-/* WebKit browsers (Chrome, Safari, Edge, Opera) */
-body::-webkit-scrollbar {
-  width: 4px !important;  /* Width of the vertical scrollbar */
-  height: 4px !important; /* Height of the horizontal scrollbar */
-}
-
-body::-webkit-scrollbar-track {
-  background: transparent !important; /* Makes the track background invisible */
-}
-
-body::-webkit-scrollbar-thumb {
-  background-color: #000000 !important; /* Color of the scrollbar line */
-  border-radius: 0px !important;       /* Keeps it a sharp, solid line */
-}
-
-body::-webkit-scrollbar-button {
-  display: none !important; /* Hides the up/down arrows */
+::-webkit-scrollbar {
+  display: none;
 }
 
 

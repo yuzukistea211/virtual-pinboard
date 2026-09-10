@@ -394,12 +394,10 @@ export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
             {isEditing ? (
               <>
                 <Eye className="w-3 h-3" />
-                <span>Preview</span>
               </>
             ) : (
               <>
                 <PenLine className="w-3 h-3" />
-                <span>Edit</span>
               </>
             )}
           </button>
@@ -421,13 +419,6 @@ export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
               }`}
               title="Change note color & custom color variation"
             >
-              <span
-                className="w-2.5 h-2.5 rounded-full border shadow-2xs shrink-0"
-                style={{
-                  backgroundColor: noteColor,
-                  borderColor: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.2)',
-                }}
-              />
               <Palette className="w-3 h-3" />
             </button>
 
@@ -618,6 +609,8 @@ export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
                   <p><span className="text-neutral-900 font-semibold">-</span> Bullet list</p>
                   <p><span className="text-neutral-900 font-semibold">`code`</span> inline block</p>
                   <p><span className="text-neutral-900 font-semibold">&gt;</span> Blockquote</p>
+                  <p><span className="text-neutral-900 font-semibold">***</span> Horizontal Rule</p>
+                  <p><span className="text-neutral-900 font-semibold">~~Strikethrough~~</span> text</p>
                 </div>
                 <div className="pt-1 border-t border-neutral-100 text-[9px] text-neutral-400">
                   Double-click note to edit. Esc to preview.

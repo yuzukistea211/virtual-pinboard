@@ -339,7 +339,7 @@ export const BoardSwitcher: React.FC<BoardSwitcherProps> = ({
 
           {/* Menu Footer */}
           <div className="p-2 border-t border-neutral-200 bg-neutral-50 flex items-center justify-between text-xs">
-            <button
+            {/* <button
               type="button"
               id="btn-create-board-footer"
               onClick={handleStartCreate}
@@ -347,7 +347,7 @@ export const BoardSwitcher: React.FC<BoardSwitcherProps> = ({
             >
               <Plus className="w-3 h-3" />
               <span>Add Pinboard</span>
-            </button>
+            </button>*/}
             <button
               type="button"
               id="btn-export-all-boards"
