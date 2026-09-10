@@ -4,8 +4,8 @@
   --app-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --app-font-scale: 1;
   --theme-bg: #ffffff;
-  --theme-text: #171717;
-  --theme-text-muted: #737373;
+  --theme-text: #3A3226;
+  --theme-text-muted: #a4a09a;
   --theme-border: #d4d4d4;
   --theme-hover-overlay: rgba(0, 0, 0, 0.04);
 }
@@ -302,6 +302,29 @@ html[data-font-scope="all"] body {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
 }
 
-::-webkit-scrollbar {
-  display: none;
+/* WebKit browsers (Chrome, Safari, Edge, Opera) */
+body::-webkit-scrollbar {
+  width: 4px !important;  /* Width of the vertical scrollbar */
+  height: 4px !important; /* Height of the horizontal scrollbar */
 }
+
+body::-webkit-scrollbar-track {
+  background: transparent !important; /* Makes the track background invisible */
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: #000000 !important; /* Color of the scrollbar line */
+  border-radius: 0px !important;       /* Keeps it a sharp, solid line */
+}
+
+body::-webkit-scrollbar-button {
+  display: none !important; /* Hides the up/down arrows */
+}
+
+
+
+
+
+
+
+
