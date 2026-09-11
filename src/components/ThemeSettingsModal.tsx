@@ -77,8 +77,7 @@ export const ThemeSettingsModal: React.FC<ThemeSettingsModalProps> = ({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative z-[10001] w-full max-w-lg max-h-[90vh] theme-ui-bg border border-neutral-300 shadow-2xl flex flex-col overflow-hidden text-neutral-900 animate-in zoom-in-95 duration-150"
-        style={{ backgroundColor: 'var(--ui-bg, var(--theme-bg, #ffffff))' }}
+        className="relative z-[10001] w-full max-w-lg max-h-[90vh] bg-white border border-neutral-300 shadow-2xl flex flex-col overflow-hidden text-neutral-900 animate-in zoom-in-95 duration-150"
       >
         {/* Modal Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 shrink-0">
@@ -230,7 +229,7 @@ export const ThemeSettingsModal: React.FC<ThemeSettingsModalProps> = ({
                 onChange={(e) => handleCustomTextChange(e.target.value)}
                 placeholder="#FFFFFF"
                 maxLength={7}
-                className="flex-1 px-3 py-1.5 border border-neutral-300 text-xs font-mono text-neutral-800 uppercase focus:outline-neutral-900 theme-ui-bg"
+                className="flex-1 px-3 py-1.5 border border-neutral-300 text-xs font-mono text-neutral-800 uppercase focus:outline-neutral-900 bg-white"
               />
 
               {/* Reset to White Button */}

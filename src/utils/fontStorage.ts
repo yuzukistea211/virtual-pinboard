@@ -10,6 +10,8 @@ export const DEFAULT_FONT_SETTINGS: FontSettings = {
   selectedFontId: 'system-sans',
   applyTo: 'all',
   sizeScale: 100,
+  letterSpacing: 0,
+  lineHeight: 1.5,
 };
 
 function openDatabase(): Promise<IDBDatabase> {
@@ -169,6 +171,8 @@ export function getStoredFontSettings(): FontSettings {
       selectedFontId: typeof parsed.selectedFontId === 'string' ? parsed.selectedFontId : DEFAULT_FONT_SETTINGS.selectedFontId,
       applyTo: parsed.applyTo === 'notes-only' ? 'notes-only' : 'all',
       sizeScale: typeof parsed.sizeScale === 'number' ? parsed.sizeScale : 100,
+      letterSpacing: typeof parsed.letterSpacing === 'number' ? parsed.letterSpacing : 0,
+      lineHeight: typeof parsed.lineHeight === 'number' ? parsed.lineHeight : 1.5,
     };
   } catch {
     return DEFAULT_FONT_SETTINGS;

@@ -93,7 +93,9 @@ export interface CustomFontRecord {
 export interface FontSettings {
   selectedFontId: string;
   applyTo: FontApplyScope;
-  sizeScale: number; // percentage (90, 100, 110, 120)
+  sizeScale: number; // percentage (75 to 150)
+  letterSpacing: number; // in px (-2 to 8, default 0)
+  lineHeight: number; // multiplier (1.1 to 2.4, default 1.5)
 }
 
 export interface ThemeColorPreset {

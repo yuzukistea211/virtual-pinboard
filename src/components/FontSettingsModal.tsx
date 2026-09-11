@@ -11,6 +11,8 @@ import {
   FileCode,
   Sliders,
   AlertCircle,
+  MoveHorizontal,
+  MoveVertical,
 } from 'lucide-react';
 import { FontOption, FontApplyScope } from '../types';
 
@@ -22,9 +24,13 @@ interface FontSettingsModalProps {
   customFonts: FontOption[];
   applyScope: FontApplyScope;
   sizeScale: number;
+  letterSpacing?: number;
+  lineHeight?: number;
   onSelectFont: (fontId: string) => void;
   onSetApplyScope: (scope: FontApplyScope) => void;
   onSetSizeScale: (scale: number) => void;
+  onSetLetterSpacing?: (spacing: number) => void;
+  onSetLineHeight?: (lineHeight: number) => void;
   onImportLocalFont: (file: File, customName?: string) => Promise<{ success: boolean; font?: FontOption; error?: string }>;
   onImportWebFont: (fontNameOrUrl: string, customName?: string) => Promise<{ success: boolean; font?: FontOption; error?: string }>;
   onRemoveCustomFont: (fontId: string) => Promise<void>;
@@ -39,9 +45,13 @@ export const FontSettingsModal: React.FC<FontSettingsModalProps> = ({
   customFonts,
   applyScope,
   sizeScale,
+  letterSpacing = 0,
+  lineHeight = 1.5,
   onSelectFont,
   onSetApplyScope,
   onSetSizeScale,
+  onSetLetterSpacing,
+  onSetLineHeight,
   onImportLocalFont,
   onImportWebFont,
   onRemoveCustomFont,
@@ -171,8 +181,7 @@ export const FontSettingsModal: React.FC<FontSettingsModalProps> = ({
         aria-modal="true"
         aria-label="Font and Typography Settings"
         onClick={(e) => e.stopPropagation()}
-        className="relative z-[10001] w-full max-w-2xl max-h-[90vh] theme-ui-bg border border-neutral-300 shadow-2xl flex flex-col overflow-hidden text-neutral-900 animate-in zoom-in-95 duration-150"
-        style={{ backgroundColor: 'var(--ui-bg, var(--theme-bg, #ffffff))' }}
+        className="relative z-[10001] w-full max-w-2xl max-h-[90vh] bg-white border border-neutral-300 shadow-2xl flex flex-col overflow-hidden text-neutral-900 animate-in zoom-in-95 duration-150"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 bg-neutral-50/50">
@@ -222,15 +231,16 @@ export const FontSettingsModal: React.FC<FontSettingsModalProps> = ({
 
             {/* Interactive Preview Container */}
             <div
-              className="p-3 bg-white border border-neutral-200 min-h-[64px] flex items-center transition-all select-text"
+              className="p-3 bg-white border border-neutral-200 min-h-[72px] flex items-center transition-all select-text"
               style={{
                 fontFamily: activeFont.fontFamily,
                 fontSize: `${13 * (sizeScale / 100)}px`,
-                lineHeight: 1.5,
+                letterSpacing: `${letterSpacing}px`,
+                lineHeight: lineHeight,
               }}
             >
-              <span className="text-neutral-900 break-words w-full">
-                {testWords || 'Type your words to test font rendering...'}
+              <span className="text-neutral-900 break-words w-full whitespace-pre-wrap">
+                {testWords || 'Pinboard: Organize ideas with Markdown notes.\nDouble-click to write, format tasks, and drag anywhere.'}
               </span>
             </div>
 
@@ -249,6 +259,14 @@ export const FontSettingsModal: React.FC<FontSettingsModalProps> = ({
                 className="px-2 py-1.5 text-[11px] text-neutral-600 bg-white border border-neutral-300 hover:bg-neutral-100 transition-colors whitespace-nowrap"
               >
                 Sample 1
+              </button>
+              <button
+                type="button"
+                onClick={() => setTestWords('Pinboard: Organize thoughts cleanly.\nLetter spacing & line height adapt to your reading flow.')}
+                className="px-2 py-1.5 text-[11px] text-neutral-600 bg-white border border-neutral-300 hover:bg-neutral-100 transition-colors whitespace-nowrap"
+                title="Test multi-line text to preview line spacing"
+              >
+                Multi-line
               </button>
               <button
                 type="button"
@@ -601,85 +619,218 @@ export const FontSettingsModal: React.FC<FontSettingsModalProps> = ({
             </form>
           )}
 
-          {/* Configuration Options: Scope & Text Scaling */}
-          <div className="pt-3 border-t border-neutral-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Scope */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-neutral-800 flex items-center gap-1.5">
+          {/* Scope & Typography Spacing Configuration */}
+          <div className="pt-4 border-t border-neutral-200 space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-neutral-800 flex items-center gap-1.5">
                 <Sliders className="w-3.5 h-3.5 text-neutral-500" />
-                Apply Font To:
-              </label>
-              <div className="flex border border-neutral-300">
-                <button
-                  type="button"
-                  onClick={() => onSetApplyScope('all')}
-                  className={`flex-1 py-1.5 text-xs font-medium transition-colors ${
-                    applyScope === 'all'
-                      ? 'bg-neutral-900 text-white'
-                      : 'bg-white text-neutral-700 hover:bg-neutral-100'
-                  }`}
-                  title="Applies custom font across all interface menus, notes, and toolbar"
-                >
-                  All Interface
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onSetApplyScope('notes-only')}
-                  className={`flex-1 py-1.5 text-xs font-medium border-l border-neutral-300 transition-colors ${
-                    applyScope === 'notes-only'
-                      ? 'bg-neutral-900 text-white'
-                      : 'bg-white text-neutral-700 hover:bg-neutral-100'
-                  }`}
-                  title="Applies custom font only to sticky note cards and written content"
-                >
-                  Notes Only
-                </button>
-              </div>
+                Typography & Layout Adjustments
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  onSetSizeScale(100);
+                  onSetLetterSpacing?.(0);
+                  onSetLineHeight?.(1.5);
+                }}
+                className="flex items-center gap-1 text-[11px] text-neutral-500 hover:text-neutral-900 transition-colors"
+                title="Reset size, letter spacing, and line height to normal"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset Spacing</span>
+              </button>
             </div>
 
-            {/* Size Scale */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-neutral-800">
-                  Text Size Scale:
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Scope */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-neutral-800 block">
+                  Apply Font To:
                 </label>
-                <span className="text-[11px] font-mono px-1.5 py-0.5 bg-neutral-100 border border-neutral-200 text-neutral-800 font-semibold">
-                  {sizeScale}%
-                </span>
-              </div>
-              
-              {/* Slider for smooth adjustment */}
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-neutral-400 font-mono">75%</span>
-                <input
-                  type="range"
-                  min="75"
-                  max="150"
-                  step="5"
-                  value={sizeScale}
-                  onChange={(e) => onSetSizeScale(Number(e.target.value))}
-                  className="flex-1 accent-neutral-900 cursor-pointer h-1.5 bg-neutral-200"
-                  aria-label="Text font size scale slider"
-                />
-                <span className="text-[10px] text-neutral-400 font-mono">150%</span>
-              </div>
-
-              {/* Quick preset buttons */}
-              <div className="grid grid-cols-6 gap-1">
-                {[80, 90, 100, 110, 125, 140].map((scale) => (
+                <div className="flex border border-neutral-300">
                   <button
                     type="button"
-                    key={scale}
-                    onClick={() => onSetSizeScale(scale)}
-                    className={`py-1 text-[11px] font-medium border transition-colors ${
-                      sizeScale === scale
-                        ? 'border-neutral-900 bg-neutral-900 text-white'
-                        : 'border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-100'
+                    onClick={() => onSetApplyScope('all')}
+                    className={`flex-1 py-1.5 text-xs font-medium transition-colors ${
+                      applyScope === 'all'
+                        ? 'bg-neutral-900 text-white'
+                        : 'bg-white text-neutral-700 hover:bg-neutral-100'
                     }`}
+                    title="Applies custom font across all interface menus, notes, and toolbar"
                   >
-                    {scale}%
+                    All Interface
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() => onSetApplyScope('notes-only')}
+                    className={`flex-1 py-1.5 text-xs font-medium border-l border-neutral-300 transition-colors ${
+                      applyScope === 'notes-only'
+                        ? 'bg-neutral-900 text-white'
+                        : 'bg-white text-neutral-700 hover:bg-neutral-100'
+                    }`}
+                    title="Applies custom font only to sticky note cards and written content"
+                  >
+                    Notes Only
+                  </button>
+                </div>
+              </div>
+
+              {/* Size Scale */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-neutral-800">
+                    Text Size Scale:
+                  </label>
+                  <span className="text-[11px] font-mono px-1.5 py-0.5 bg-neutral-100 border border-neutral-200 text-neutral-800 font-semibold">
+                    {sizeScale}%
+                  </span>
+                </div>
+
+                {/* Slider */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-neutral-400 font-mono">75%</span>
+                  <input
+                    type="range"
+                    min="75"
+                    max="150"
+                    step="5"
+                    value={sizeScale}
+                    onChange={(e) => onSetSizeScale(Number(e.target.value))}
+                    className="flex-1 accent-neutral-900 cursor-pointer h-1.5 bg-neutral-200"
+                    aria-label="Text font size scale slider"
+                  />
+                  <span className="text-[10px] text-neutral-400 font-mono">150%</span>
+                </div>
+
+                {/* Quick preset buttons */}
+                <div className="grid grid-cols-6 gap-1">
+                  {[80, 90, 100, 110, 125, 140].map((scale) => (
+                    <button
+                      type="button"
+                      key={scale}
+                      onClick={() => onSetSizeScale(scale)}
+                      className={`py-1 text-[11px] font-medium border transition-colors ${
+                        sizeScale === scale
+                          ? 'border-neutral-900 bg-neutral-900 text-white'
+                          : 'border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-100'
+                      }`}
+                    >
+                      {scale}%
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Letter Spacing (Tracking) */}
+              <div className="space-y-2 p-3 bg-neutral-50/80 border border-neutral-200">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-neutral-800 flex items-center gap-1.5">
+                    <MoveHorizontal className="w-3.5 h-3.5 text-neutral-600" />
+                    <span>Letter Spacing (Tracking)</span>
+                  </label>
+                  <span className="text-[11px] font-mono px-1.5 py-0.5 bg-white border border-neutral-300 text-neutral-800 font-semibold">
+                    {letterSpacing > 0 ? `+${letterSpacing}px` : `${letterSpacing}px`}
+                    {letterSpacing === 0 ? ' (Normal)' : ''}
+                  </span>
+                </div>
+
+                {/* Slider */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-neutral-400 font-mono">-2px</span>
+                  <input
+                    type="range"
+                    min="-2"
+                    max="6"
+                    step="0.5"
+                    value={letterSpacing}
+                    onChange={(e) => onSetLetterSpacing?.(Number(e.target.value))}
+                    className="flex-1 accent-neutral-900 cursor-pointer h-1.5 bg-neutral-200"
+                    aria-label="Letter spacing slider"
+                  />
+                  <span className="text-[10px] text-neutral-400 font-mono">+6px</span>
+                </div>
+
+                {/* Quick preset buttons */}
+                <div className="grid grid-cols-6 gap-1">
+                  {[
+                    { label: 'Tight', val: -1 },
+                    { label: '0px', val: 0 },
+                    { label: '+0.5', val: 0.5 },
+                    { label: '+1px', val: 1 },
+                    { label: '+2px', val: 2 },
+                    { label: '+3.5', val: 3.5 },
+                  ].map((item) => (
+                    <button
+                      type="button"
+                      key={item.val}
+                      onClick={() => onSetLetterSpacing?.(item.val)}
+                      className={`py-1 text-[10px] font-medium border transition-colors ${
+                        letterSpacing === item.val
+                          ? 'border-neutral-900 bg-neutral-900 text-white'
+                          : 'border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-100'
+                      }`}
+                      title={`Set letter spacing to ${item.val}px`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Line Spacing (Leading / Line Height) */}
+              <div className="space-y-2 p-3 bg-neutral-50/80 border border-neutral-200">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-neutral-800 flex items-center gap-1.5">
+                    <MoveVertical className="w-3.5 h-3.5 text-neutral-600" />
+                    <span>Line Spacing (Leading)</span>
+                  </label>
+                  <span className="text-[11px] font-mono px-1.5 py-0.5 bg-white border border-neutral-300 text-neutral-800 font-semibold">
+                    {lineHeight.toFixed(2)}×
+                    {lineHeight === 1.5 ? ' (Normal)' : ''}
+                  </span>
+                </div>
+
+                {/* Slider */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-neutral-400 font-mono">1.1×</span>
+                  <input
+                    type="range"
+                    min="1.1"
+                    max="2.4"
+                    step="0.05"
+                    value={lineHeight}
+                    onChange={(e) => onSetLineHeight?.(Number(e.target.value))}
+                    className="flex-1 accent-neutral-900 cursor-pointer h-1.5 bg-neutral-200"
+                    aria-label="Line spacing slider"
+                  />
+                  <span className="text-[10px] text-neutral-400 font-mono">2.4×</span>
+                </div>
+
+                {/* Quick preset buttons */}
+                <div className="grid grid-cols-6 gap-1">
+                  {[
+                    { label: '1.2×', val: 1.2 },
+                    { label: '1.35', val: 1.35 },
+                    { label: '1.5×', val: 1.5 },
+                    { label: '1.7×', val: 1.7 },
+                    { label: '1.9×', val: 1.9 },
+                    { label: '2.2×', val: 2.2 },
+                  ].map((item) => (
+                    <button
+                      type="button"
+                      key={item.val}
+                      onClick={() => onSetLineHeight?.(item.val)}
+                      className={`py-1 text-[10px] font-medium border transition-colors ${
+                        Math.abs(lineHeight - item.val) < 0.02
+                          ? 'border-neutral-900 bg-neutral-900 text-white'
+                          : 'border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-100'
+                      }`}
+                      title={`Set line spacing to ${item.val}×`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

@@ -11,9 +11,7 @@ import { useNoteColorPresets } from './hooks/useNoteColorPresets';
 import { StickyNoteCard } from './components/StickyNoteCard';
 import { MinimalDock } from './components/MinimalDock';
 import { BoardSwitcher } from './components/BoardSwitcher';
-import { FontSettingsModal } from './components/FontSettingsModal';
-import { ThemeSettingsModal } from './components/ThemeSettingsModal';
-import { NoteColorPresetsModal } from './components/NoteColorPresetsModal';
+import { SettingsModal, SettingsTab } from './components/SettingsModal';
 import { DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT } from './constants';
 import { FileText } from 'lucide-react';
 
@@ -42,13 +40,17 @@ export default function App() {
   } = usePinboard();
 
   const fontManager = useFontSettings();
-  const [isFontModalOpen, setIsFontModalOpen] = useState(false);
-
   const themeManager = useThemeSettings();
-  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
-
   const noteColorManager = useNoteColorPresets();
-  const [isNoteColorModalOpen, setIsNoteColorModalOpen] = useState(false);
+
+  // Unified Settings Modal State
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>('notes');
+
+  const handleOpenSettings = (tab: SettingsTab = 'notes') => {
+    setSettingsTab(tab);
+    setIsSettingsOpen(true);
+  };
 
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -156,7 +158,8 @@ export default function App() {
             key={note.id}
             note={note}
             colorPresets={noteColorManager.presets}
-            onOpenColorPresetsModal={() => setIsNoteColorModalOpen(true)}
+            highlightColor={noteColorManager.highlightColor}
+            onOpenColorPresetsModal={() => handleOpenSettings('notes')}
             onUpdateContent={updateNoteContent}
             onUpdatePosition={updateNotePosition}
             onUpdateSize={updateNoteSize}
@@ -191,7 +194,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Floating Minimal Toolbar */}
+      {/* Floating Minimal Toolbar with Combined Settings Button */}
       <MinimalDock
         noteCount={notes.length}
         boardName={activeBoard.name}
@@ -200,53 +203,51 @@ export default function App() {
         onExport={() => exportBoardJSON(false)}
         onImport={importBoardJSON}
         onClear={clearBoard}
-        onOpenFontSettings={() => setIsFontModalOpen(true)}
-        onOpenThemeSettings={() => setIsThemeModalOpen(true)}
-        onOpenNoteColorPresets={() => setIsNoteColorModalOpen(true)}
+        onOpenSettings={() => handleOpenSettings('notes')}
         activeFontName={fontManager.activeFont.name}
         activeThemeColor={themeManager.themeColor}
         isDraggingNewNote={isDraggingNewNote}
       />
 
-      {/* Font Customization & Import Modal */}
-      <FontSettingsModal
-        isOpen={isFontModalOpen}
-        onClose={() => setIsFontModalOpen(false)}
+      {/* Unified Settings Modal (Note Colors & Highlight, Font, Canvas Theme) */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        initialTab={settingsTab}
+        // Note Colors & Highlight
+        notePresets={noteColorManager.presets}
+        highlightColor={noteColorManager.highlightColor}
+        highlightPresets={noteColorManager.highlightPresets}
+        onUpdateNotePreset={noteColorManager.updatePreset}
+        onAddNotePreset={noteColorManager.addPreset}
+        onDeleteNotePreset={noteColorManager.deletePreset}
+        onResetNotePresets={noteColorManager.resetToDefaults}
+        onSetHighlightColor={noteColorManager.setHighlightColor}
+        onResetHighlightColor={noteColorManager.resetHighlightColor}
+        // Font
         activeFont={fontManager.activeFont}
         presetFonts={fontManager.presetFonts}
         customFonts={fontManager.customFonts}
         applyScope={fontManager.settings.applyTo}
         sizeScale={fontManager.settings.sizeScale}
+        letterSpacing={fontManager.settings.letterSpacing}
+        lineHeight={fontManager.settings.lineHeight}
         onSelectFont={fontManager.selectFont}
         onSetApplyScope={fontManager.setApplyScope}
         onSetSizeScale={fontManager.setSizeScale}
+        onSetLetterSpacing={fontManager.setLetterSpacing}
+        onSetLineHeight={fontManager.setLineHeight}
         onImportLocalFont={fontManager.importLocalFont}
         onImportWebFont={fontManager.importWebFont}
         onRemoveCustomFont={fontManager.removeCustomFont}
-        onResetToDefault={fontManager.resetToDefault}
-      />
-
-      {/* UI Background Theme Settings Modal */}
-      <ThemeSettingsModal
-        isOpen={isThemeModalOpen}
-        onClose={() => setIsThemeModalOpen(false)}
+        onResetFontToDefault={fontManager.resetToDefault}
+        // Theme
         themeColor={themeManager.themeColor}
-        onSelectColor={themeManager.setThemeColor}
-        onResetColor={themeManager.resetThemeColor}
-        presets={themeManager.presets}
-        activePreset={themeManager.activePreset}
-        isDark={themeManager.isDark}
-      />
-
-      {/* Note Color Presets Customizer Modal */}
-      <NoteColorPresetsModal
-        isOpen={isNoteColorModalOpen}
-        onClose={() => setIsNoteColorModalOpen(false)}
-        presets={noteColorManager.presets}
-        onUpdatePreset={noteColorManager.updatePreset}
-        onAddPreset={noteColorManager.addPreset}
-        onDeletePreset={noteColorManager.deletePreset}
-        onResetToDefaults={noteColorManager.resetToDefaults}
+        onSelectThemeColor={themeManager.setThemeColor}
+        onResetThemeColor={themeManager.resetThemeColor}
+        themePresets={themeManager.presets}
+        activeThemePreset={themeManager.activePreset}
+        isThemeDark={themeManager.isDark}
       />
     </main>
   );

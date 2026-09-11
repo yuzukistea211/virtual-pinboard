@@ -138,6 +138,8 @@ export function useFontSettings() {
     const root = document.documentElement;
     root.style.setProperty('--app-font-family', activeFont.fontFamily);
     root.style.setProperty('--app-font-scale', `${settings.sizeScale / 100}`);
+    root.style.setProperty('--app-letter-spacing', `${settings.letterSpacing ?? 0}px`);
+    root.style.setProperty('--app-line-height', `${settings.lineHeight ?? 1.5}`);
     root.setAttribute('data-font-scope', settings.applyTo);
 
     // Also persist
@@ -176,6 +178,22 @@ export function useFontSettings() {
     setSettings((prev) => ({
       ...prev,
       sizeScale: scale,
+    }));
+  }, []);
+
+  // Set letter spacing in pixels
+  const setLetterSpacing = useCallback((spacing: number) => {
+    setSettings((prev) => ({
+      ...prev,
+      letterSpacing: spacing,
+    }));
+  }, []);
+
+  // Set line height multiplier
+  const setLineHeight = useCallback((height: number) => {
+    setSettings((prev) => ({
+      ...prev,
+      lineHeight: height,
     }));
   }, []);
 
@@ -361,6 +379,8 @@ export function useFontSettings() {
     selectFont,
     setApplyScope,
     setSizeScale,
+    setLetterSpacing,
+    setLineHeight,
     importLocalFont,
     importWebFont,
     removeCustomFont,

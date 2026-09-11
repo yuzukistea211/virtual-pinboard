@@ -4,6 +4,27 @@ import { NOTE_COLOR_PRESETS } from '../constants';
 import { normalizeHex, isValidHex, isColorDark } from '../utils/themePresets';
 
 export const NOTE_COLOR_PRESETS_STORAGE_KEY = 'pinboard_note_color_presets_v1';
+export const HIGHLIGHT_COLOR_STORAGE_KEY = 'pinboard_highlight_color_v1';
+export const DEFAULT_HIGHLIGHT_COLOR = '#FEF08A';
+
+export interface HighlightColorPreset {
+  id: string;
+  name: string;
+  hex: string;
+}
+
+export const HIGHLIGHT_COLOR_PRESETS: HighlightColorPreset[] = [
+  { id: 'canary', name: 'Canary Yellow', hex: '#FEF08A' },
+  { id: 'lemon', name: 'Electric Lemon', hex: '#FDE047' },
+  { id: 'lime', name: 'Pastel Lime', hex: '#BBF7D0' },
+  { id: 'mint', name: 'Mint Foam', hex: '#A7F3D0' },
+  { id: 'sky', name: 'Sky Cyan', hex: '#BAE6FD' },
+  { id: 'lavender', name: 'Soft Lavender', hex: '#E9D5FF' },
+  { id: 'pink', name: 'Rose Blossom', hex: '#FBCFE8' },
+  { id: 'peach', name: 'Warm Peach', hex: '#FED7AA' },
+  { id: 'amber', name: 'Coral Amber', hex: '#FDBA74' },
+  { id: 'slate', name: 'Slate Dusk', hex: '#64748B' },
+];
 
 export function useNoteColorPresets() {
   const [presets, setPresets] = useState<NoteColorPreset[]>(() => {
@@ -30,7 +51,21 @@ export function useNoteColorPresets() {
     return NOTE_COLOR_PRESETS;
   });
 
-  // Persist to localStorage whenever presets change
+  // Highlight color state for markdown ==text==
+  const [highlightColor, setHighlightColorState] = useState<string>(() => {
+    if (typeof window === 'undefined') return DEFAULT_HIGHLIGHT_COLOR;
+    try {
+      const stored = localStorage.getItem(HIGHLIGHT_COLOR_STORAGE_KEY);
+      if (stored && isValidHex(stored)) {
+        return normalizeHex(stored);
+      }
+    } catch (e) {
+      console.warn('Failed to parse highlight color from localStorage:', e);
+    }
+    return DEFAULT_HIGHLIGHT_COLOR;
+  });
+
+  // Persist presets to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(NOTE_COLOR_PRESETS_STORAGE_KEY, JSON.stringify(presets));
@@ -38,6 +73,22 @@ export function useNoteColorPresets() {
       console.warn('Failed to store note color presets:', e);
     }
   }, [presets]);
+
+  // Persist highlight color & sync CSS variables
+  useEffect(() => {
+    try {
+      localStorage.setItem(HIGHLIGHT_COLOR_STORAGE_KEY, highlightColor);
+    } catch (e) {
+      console.warn('Failed to store highlight color:', e);
+    }
+
+    if (typeof document !== 'undefined') {
+      const root = document.documentElement;
+      root.style.setProperty('--note-highlight-color', highlightColor);
+      const isDark = isColorDark(highlightColor);
+      root.style.setProperty('--note-highlight-text', isDark ? '#ffffff' : '#1e293b');
+    }
+  }, [highlightColor]);
 
   const updatePreset = useCallback((id: string, updates: { name?: string; hex?: string }) => {
     setPresets((prev) =>
@@ -74,12 +125,29 @@ export function useNoteColorPresets() {
     });
   }, []);
 
+  const setHighlightColor = useCallback((color: string) => {
+    if (isValidHex(color)) {
+      setHighlightColorState(normalizeHex(color));
+    } else {
+      setHighlightColorState(color);
+    }
+  }, []);
+
+  const resetHighlightColor = useCallback(() => {
+    setHighlightColorState(DEFAULT_HIGHLIGHT_COLOR);
+  }, []);
+
   const resetToDefaults = useCallback(() => {
     setPresets(NOTE_COLOR_PRESETS);
+    setHighlightColorState(DEFAULT_HIGHLIGHT_COLOR);
   }, []);
 
   return {
     presets,
+    highlightColor,
+    setHighlightColor,
+    resetHighlightColor,
+    highlightPresets: HIGHLIGHT_COLOR_PRESETS,
     updatePreset,
     addPreset,
     deletePreset,

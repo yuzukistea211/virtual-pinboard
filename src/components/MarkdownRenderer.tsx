@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { isColorDark } from '../utils/themePresets';
 
 /**
  * Custom remark plugin to parse ==highlighted words== syntax
@@ -44,6 +45,7 @@ interface MarkdownRendererProps {
   onToggleTask?: (taskIndex: number) => void;
   onDoubleClick?: () => void;
   isDark?: boolean;
+  highlightColor?: string;
 }
 
 export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
@@ -51,6 +53,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   onToggleTask,
   onDoubleClick,
   isDark = false,
+  highlightColor,
 }) => {
   // Counter ref to map rendered checkboxes to their sequential task index in the markdown
   const taskIndexCounter = useRef<number>(0);
@@ -87,33 +90,37 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         e.stopPropagation();
         onDoubleClick?.();
       }}
-      className={`markdown-body w-full h-full text-xs leading-relaxed select-text overflow-y-auto pr-1 ${textColorClass}`}
+      className={`markdown-body w-full h-full text-xs select-text overflow-y-auto pr-1 ${textColorClass}`}
       style={{
         wordBreak: 'break-word',
         fontSize: 'calc(0.75rem * var(--app-font-scale, 1))',
-        lineHeight: 'calc(1.5 * var(--app-font-scale, 1))',
+        lineHeight: 'var(--app-line-height, 1.5)',
+        letterSpacing: 'var(--app-letter-spacing, 0px)',
       }}
     >
       <Markdown
         remarkPlugins={[remarkGfm, remarkHighlight]}
         components={{
-          mark: ({ children }) => (
-            <mark
-              className={`px-1.5 py-0.5 font-medium mx-0.5 inline-block relative ${
-                isDark
-                  ? 'bg-amber-400/25 text-amber-100'
-                  : 'bg-yellow-200/80 text-neutral-900'
-              }`}
-              style={{
-                transform: 'rotate(-1.2deg)',
-                boxDecorationBreak: 'clone',
-                WebkitBoxDecorationBreak: 'clone',
+          mark: ({ children }) => {
+            const markBg = highlightColor || 'var(--note-highlight-color, #fef08a)';
+            const hasDarkBg = highlightColor ? isColorDark(highlightColor) : false;
+            const markText = hasDarkBg ? '#ffffff' : 'var(--note-highlight-text, #1e293b)';
 
-              }}
-            >
-              {children}
-            </mark>
-          ),
+            return (
+              <mark
+                className="px-1.5 py-0.5 font-medium mx-0.5 inline-block relative"
+                style={{
+                  backgroundColor: markBg,
+                  color: markText,
+                  transform: 'rotate(-1.2deg)',
+                  boxDecorationBreak: 'clone',
+                  WebkitBoxDecorationBreak: 'clone',
+                }}
+              >
+                {children}
+              </mark>
+            );
+          },
           h1: ({ children }) => (
             <h1 className={`text-sm font-bold mt-1 mb-1 pb-1 border-b ${headingColorClass} ${borderColorClass}`}>
               {children}
@@ -130,7 +137,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
             </h3>
           ),
           p: ({ children }) => (
-            <p className={`mb-1.5 last:mb-0 leading-relaxed ${textColorClass}`}>
+            <p className={`mb-1.5 last:mb-0 ${textColorClass}`}>
               {children}
             </p>
           ),
@@ -148,7 +155,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
             const isTask = className?.includes('task-list-item');
             return (
               <li
-                className={`leading-relaxed ${
+                className={`${
                   isTask ? 'list-none -ml-4 flex items-start gap-1.5 my-0.5' : ''
                 }`}
               >

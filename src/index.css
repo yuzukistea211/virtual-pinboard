@@ -3,11 +3,15 @@
 :root {
   --app-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --app-font-scale: 1;
+  --app-letter-spacing: 0px;
+  --app-line-height: 1.5;
   --theme-bg: #ffffff;
   --theme-text: #3A3226;
   --theme-text-muted: #a4a09a;
   --theme-border: #d4d4d4;
   --theme-hover-overlay: rgba(0, 0, 0, 0.04);
+  --note-highlight-color: #fef08a;
+  --note-highlight-text: #1e293b;
 }
 
 html[data-theme-tone="dark"] {
@@ -147,72 +151,36 @@ html[data-theme-tone="dark"] #empty-board-indicator svg {
   color: #ffffff !important;
 }
 
-/* Modals & Dialogs in Dark Mode */
-html[data-theme-tone="dark"] #font-settings-dialog,
-html[data-theme-tone="dark"] #theme-settings-dialog,
-html[data-theme-tone="dark"] #note-color-presets-dialog {
-  background-color: #18181b !important;
-  border-color: rgba(255, 255, 255, 0.22) !important;
-  color: #ffffff !important;
+/* Modals & Dialogs: strictly isolated from canvas theme colors */
+#settings-dialog,
+#font-settings-dialog,
+#theme-settings-dialog,
+#note-color-presets-dialog {
+  background-color: #ffffff !important;
+  border-color: #d4d4d4 !important;
+  color: #171717 !important;
 }
 
-html[data-theme-tone="dark"] #font-settings-dialog h2,
-html[data-theme-tone="dark"] #theme-settings-dialog h2,
-html[data-theme-tone="dark"] #note-color-presets-dialog h2,
-html[data-theme-tone="dark"] #font-settings-dialog h3,
-html[data-theme-tone="dark"] #theme-settings-dialog h3,
-html[data-theme-tone="dark"] #note-color-presets-dialog h3,
-html[data-theme-tone="dark"] #font-settings-dialog span,
-html[data-theme-tone="dark"] #theme-settings-dialog span,
-html[data-theme-tone="dark"] #note-color-presets-dialog span {
-  color: #ffffff;
+#settings-dialog h2,
+#settings-dialog h3,
+#font-settings-dialog h2,
+#font-settings-dialog h3,
+#theme-settings-dialog h2,
+#theme-settings-dialog h3,
+#note-color-presets-dialog h2,
+#note-color-presets-dialog h3 {
+  color: #171717 !important;
 }
 
-html[data-theme-tone="dark"] #font-settings-dialog p,
-html[data-theme-tone="dark"] #theme-settings-dialog p,
-html[data-theme-tone="dark"] #note-color-presets-dialog p,
-html[data-theme-tone="dark"] #font-settings-dialog label,
-html[data-theme-tone="dark"] #theme-settings-dialog label,
-html[data-theme-tone="dark"] #note-color-presets-dialog label {
-  color: #cbd5e1 !important;
-}
-
-html[data-theme-tone="dark"] #font-settings-dialog input[type="text"],
-html[data-theme-tone="dark"] #theme-settings-dialog input[type="text"],
-html[data-theme-tone="dark"] #note-color-presets-dialog input[type="text"] {
-  background-color: #27272a !important;
-  color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.25) !important;
-}
-
-html[data-theme-tone="dark"] #font-settings-dialog .border-neutral-200,
-html[data-theme-tone="dark"] #theme-settings-dialog .border-neutral-200,
-html[data-theme-tone="dark"] #note-color-presets-dialog .border-neutral-200,
-html[data-theme-tone="dark"] #font-settings-dialog .border-neutral-300,
-html[data-theme-tone="dark"] #theme-settings-dialog .border-neutral-300,
-html[data-theme-tone="dark"] #note-color-presets-dialog .border-neutral-300 {
-  border-color: rgba(255, 255, 255, 0.15) !important;
-}
-
-html[data-theme-tone="dark"] #font-settings-dialog .bg-neutral-50,
-html[data-theme-tone="dark"] #theme-settings-dialog .bg-neutral-50,
-html[data-theme-tone="dark"] #note-color-presets-dialog .bg-neutral-50,
-html[data-theme-tone="dark"] #font-settings-dialog .bg-neutral-100,
-html[data-theme-tone="dark"] #theme-settings-dialog .bg-neutral-100,
-html[data-theme-tone="dark"] #note-color-presets-dialog .bg-neutral-100 {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-html[data-theme-tone="dark"] #font-settings-dialog button:not(.keep-bg),
-html[data-theme-tone="dark"] #theme-settings-dialog button:not(.keep-bg),
-html[data-theme-tone="dark"] #note-color-presets-dialog button:not(.keep-bg) {
-  color: #ffffff;
-}
-
-html[data-theme-tone="dark"] #font-settings-dialog svg,
-html[data-theme-tone="dark"] #theme-settings-dialog svg,
-html[data-theme-tone="dark"] #note-color-presets-dialog svg {
-  color: #f8fafc;
+#settings-dialog p,
+#settings-dialog label,
+#font-settings-dialog p,
+#font-settings-dialog label,
+#theme-settings-dialog p,
+#theme-settings-dialog label,
+#note-color-presets-dialog p,
+#note-color-presets-dialog label {
+  color: #525252 !important;
 }
 
 /* Global / All Interface font application */
@@ -230,6 +198,7 @@ html[data-font-scope="all"] .markdown-body h3,
 html[data-font-scope="all"] .markdown-body li,
 html[data-font-scope="all"] .markdown-body blockquote {
   font-family: var(--app-font-family) !important;
+  letter-spacing: var(--app-letter-spacing, 0px) !important;
 }
 
 /* Sticky notes only scope */
@@ -243,17 +212,20 @@ html[data-font-scope="notes-only"] .sticky-note-card .markdown-body h3,
 html[data-font-scope="notes-only"] .sticky-note-card .markdown-body li,
 html[data-font-scope="notes-only"] .sticky-note-card .markdown-body blockquote {
   font-family: var(--app-font-family) !important;
+  letter-spacing: var(--app-letter-spacing, 0px) !important;
 }
 
-/* Typography Scaling based on --app-font-scale */
+/* Typography Scaling & Spacing based on --app-font-scale, --app-line-height, and --app-letter-spacing */
 .sticky-note-card textarea {
   font-size: calc(0.75rem * var(--app-font-scale, 1)) !important;
-  line-height: calc(1.5 * var(--app-font-scale, 1)) !important;
+  line-height: var(--app-line-height, 1.5) !important;
+  letter-spacing: var(--app-letter-spacing, 0px) !important;
 }
 
 .sticky-note-card .markdown-body {
   font-size: calc(0.75rem * var(--app-font-scale, 1)) !important;
-  line-height: calc(1.5 * var(--app-font-scale, 1)) !important;
+  line-height: var(--app-line-height, 1.5) !important;
+  letter-spacing: var(--app-letter-spacing, 0px) !important;
 }
 
 .sticky-note-card .markdown-body p,
@@ -267,28 +239,33 @@ html[data-font-scope="notes-only"] .sticky-note-card .markdown-body blockquote {
 .sticky-note-card .markdown-body label,
 .sticky-note-card .markdown-body span:not([class*="lucide"]) {
   font-size: calc(0.75rem * var(--app-font-scale, 1)) !important;
-  line-height: calc(1.5 * var(--app-font-scale, 1)) !important;
+  line-height: var(--app-line-height, 1.5) !important;
+  letter-spacing: var(--app-letter-spacing, 0px) !important;
 }
 
 .sticky-note-card .markdown-body h1 {
   font-size: calc(1.15rem * var(--app-font-scale, 1)) !important;
-  line-height: calc(1.3 * var(--app-font-scale, 1)) !important;
+  line-height: calc(var(--app-line-height, 1.5) * 0.9) !important;
+  letter-spacing: var(--app-letter-spacing, 0px) !important;
 }
 
 .sticky-note-card .markdown-body h2 {
   font-size: calc(0.95rem * var(--app-font-scale, 1)) !important;
-  line-height: calc(1.35 * var(--app-font-scale, 1)) !important;
+  line-height: calc(var(--app-line-height, 1.5) * 0.92) !important;
+  letter-spacing: var(--app-letter-spacing, 0px) !important;
 }
 
 .sticky-note-card .markdown-body h3 {
   font-size: calc(0.85rem * var(--app-font-scale, 1)) !important;
-  line-height: calc(1.4 * var(--app-font-scale, 1)) !important;
+  line-height: calc(var(--app-line-height, 1.5) * 0.95) !important;
+  letter-spacing: var(--app-letter-spacing, 0px) !important;
 }
 
 .sticky-note-card .markdown-body pre code,
 .sticky-note-card .markdown-body :not(pre) > code {
   font-size: calc(0.7rem * var(--app-font-scale, 1)) !important;
-  line-height: calc(1.4 * var(--app-font-scale, 1)) !important;
+  line-height: calc(var(--app-line-height, 1.5) * 0.95) !important;
+  letter-spacing: normal !important;
 }
 
 /* When font scope is 'all', also scale UI controls proportionately */

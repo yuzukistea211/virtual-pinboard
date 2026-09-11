@@ -25,6 +25,7 @@ import { isColorDark, isValidHex, normalizeHex } from '../utils/themePresets';
 interface StickyNoteCardProps {
   note: StickyNote;
   colorPresets?: NoteColorPreset[];
+  highlightColor?: string;
   onOpenColorPresetsModal?: () => void;
   onUpdateContent: (id: string, text: string) => void;
   onUpdatePosition: (id: string, x: number, y: number) => void;
@@ -37,6 +38,7 @@ interface StickyNoteCardProps {
 export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
   note,
   colorPresets,
+  highlightColor,
   onOpenColorPresetsModal,
   onUpdateContent,
   onUpdatePosition,
@@ -727,7 +729,8 @@ export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
               style={{
                 fontFamily: 'inherit',
                 fontSize: 'calc(0.75rem * var(--app-font-scale, 1))',
-                lineHeight: 'calc(1.5 * var(--app-font-scale, 1))',
+                lineHeight: 'var(--app-line-height, 1.5)',
+                letterSpacing: 'var(--app-letter-spacing, 0px)',
                 color: isDark ? '#f8fafc' : '#1e293b',
                 caretColor: isDark ? '#f8fafc' : '#1e293b',
               }}
@@ -746,6 +749,7 @@ export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
               onToggleTask={handleToggleTask}
               onDoubleClick={handleStartWriting}
               isDark={isDark}
+              highlightColor={highlightColor}
             />
           </div>
         )}

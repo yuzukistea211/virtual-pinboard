@@ -66,8 +66,7 @@ export const NoteColorPresetsModal: React.FC<NoteColorPresetsModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="relative z-[10001] w-full max-w-xl max-h-[90vh] theme-ui-bg border border-neutral-300 shadow-2xl flex flex-col overflow-hidden text-neutral-900 animate-in zoom-in-95 duration-150"
-        style={{ backgroundColor: 'var(--ui-bg, var(--theme-bg, #ffffff))' }}
+        className="relative z-[10001] w-full max-w-xl max-h-[90vh] bg-white border border-neutral-300 shadow-2xl flex flex-col overflow-hidden text-neutral-900 animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
