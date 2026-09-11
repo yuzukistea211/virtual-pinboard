@@ -63,6 +63,7 @@ html[data-theme-tone="dark"] #board-switcher-dropdown {
 }
 
 html[data-theme-tone="dark"] #board-switcher-dropdown div.bg-neutral-50,
+html[data-theme-tone="dark"] #board-switcher-dropdown form.bg-neutral-50,
 html[data-theme-tone="dark"] #board-switcher-dropdown form.bg-neutral-50\/70 {
   background-color: rgba(255, 255, 255, 0.08) !important;
   border-color: rgba(255, 255, 255, 0.15) !important;
@@ -73,18 +74,55 @@ html[data-theme-tone="dark"] #board-switcher-dropdown button {
   color: #f8fafc !important;
 }
 
+html[data-theme-tone="dark"] #board-switcher-dropdown svg {
+  color: #f8fafc !important;
+}
+
 html[data-theme-tone="dark"] #board-switcher-dropdown input {
   background-color: #27272a !important;
   color: #ffffff !important;
   border-color: rgba(255, 255, 255, 0.25) !important;
 }
 
-html[data-theme-tone="dark"] #board-switcher-dropdown li:hover {
+/* Selected pinboard in dark theme: dark background & high-contrast inner components */
+html[data-theme-tone="dark"] #board-switcher-dropdown .board-item-active,
+html[data-theme-tone="dark"] #board-switcher-dropdown div.bg-neutral-100 {
+  background-color: #27272a !important;
+  color: #ffffff !important;
+}
+
+html[data-theme-tone="dark"] #board-switcher-dropdown .board-item-active span,
+html[data-theme-tone="dark"] #board-switcher-dropdown div.bg-neutral-100 span {
+  color: #ffffff !important;
+}
+
+html[data-theme-tone="dark"] #board-switcher-dropdown .board-item-active span.text-neutral-400,
+html[data-theme-tone="dark"] #board-switcher-dropdown div.bg-neutral-100 span.text-neutral-400 {
+  color: #a1a1aa !important;
+}
+
+html[data-theme-tone="dark"] #board-switcher-dropdown .board-item-active svg,
+html[data-theme-tone="dark"] #board-switcher-dropdown div.bg-neutral-100 svg {
+  color: #ffffff !important;
+}
+
+html[data-theme-tone="dark"] #board-switcher-dropdown .board-item-active:hover,
+html[data-theme-tone="dark"] #board-switcher-dropdown div.bg-neutral-100:hover {
+  background-color: #323238 !important;
+}
+
+/* Unselected pinboard hover in dark theme */
+html[data-theme-tone="dark"] #board-switcher-dropdown .board-item:hover,
+html[data-theme-tone="dark"] #board-switcher-dropdown div.cursor-pointer:hover:not(.board-item-active):not(.bg-neutral-100) {
   background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-html[data-theme-tone="dark"] #board-switcher-dropdown li.bg-neutral-100 {
-  background-color: rgba(255, 255, 255, 0.16) !important;
+html[data-theme-tone="dark"] #board-switcher-dropdown .divide-neutral-100 > * + * {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme-tone="dark"] #board-switcher-dropdown button:hover {
+  background-color: rgba(255, 255, 255, 0.12) !important;
 }
 
 /* Minimal Dock in Dark Mode */

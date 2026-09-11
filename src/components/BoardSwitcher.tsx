@@ -255,8 +255,8 @@ export const BoardSwitcher: React.FC<BoardSwitcherProps> = ({
                   }}
                   className={`group flex items-center justify-between px-3 py-2 text-xs transition-colors cursor-pointer ${
                     isActive
-                      ? 'bg-neutral-100 text-neutral-950 font-medium'
-                      : 'hover:bg-neutral-50 text-neutral-700'
+                      ? 'bg-neutral-100 text-neutral-950 font-medium board-item-active'
+                      : 'hover:bg-neutral-50 text-neutral-700 board-item'
                   }`}
                 >
                   <div className="flex items-center gap-2 min-w-0 pr-2">
