@@ -5,6 +5,9 @@ A minimal, distraction-free pure white canvas to organize, edit, and drag-and-dr
 
 **ALL OF THIS IS PURELY VIBE-CODED.**
 
+![alt text](https://github.com/yuzukistea211/virtual-pinboard/blob/main/demo.gif)
+
+
 ---
 
 ## Features
