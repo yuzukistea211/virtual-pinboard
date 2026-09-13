@@ -342,7 +342,7 @@ export const CustomMarkdownSettingsTab: React.FC<CustomMarkdownSettingsTabProps>
               <div className="flex items-center justify-between text-[11px] text-neutral-500 border-b border-neutral-100 pb-1.5">
                 <span className="font-semibold text-neutral-700 flex items-center gap-1.5">
                   <Eye className="w-3.5 h-3.5 text-neutral-500" />
-                  <span>Real-Time Appearance Preview</span>
+                  <span>Preview</span>
                 </span>
                 <span className="font-mono text-[10px] text-neutral-400">
                   {activeRule.prefix}
