@@ -1,7 +1,100 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { isColorDark } from '../utils/themePresets';
+import { CustomMarkdownRule } from '../types';
+import { getCustomMarkdownStyle } from '../utils/markdownUtils';
+
+function escapeRegex(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Creates a remark plugin to parse user-defined customized markdown syntax
+ * into styled <span> elements according to each rule's syntax (prefix and suffix).
+ */
+function createRemarkCustomMarkdown(rules: CustomMarkdownRule[]) {
+  const activeRules = rules.filter(
+    (r) => r.prefix && r.suffix && r.prefix.trim() !== '' && r.suffix.trim() !== ''
+  );
+
+  // Sort by total delimiter length descending so longer syntax prefixes match first
+  const sortedRules = [...activeRules].sort(
+    (a, b) => b.prefix.length + b.suffix.length - (a.prefix.length + a.suffix.length)
+  );
+
+  return () => {
+    return (tree: any) => {
+      if (sortedRules.length === 0) return;
+
+      function visit(node: any) {
+        if (!node || !node.children) return;
+        const newChildren: any[] = [];
+
+        for (const child of node.children) {
+          if (child.type === 'text' && typeof child.value === 'string') {
+            let currentPieces: any[] = [{ type: 'text', value: child.value }];
+
+            for (const rule of sortedRules) {
+              const rulePattern = new RegExp(
+                `(${escapeRegex(rule.prefix)}[^\\n]+?${escapeRegex(rule.suffix)})`,
+                'g'
+              );
+
+              const nextPieces: any[] = [];
+              for (const piece of currentPieces) {
+                if (
+                  piece.type === 'text' &&
+                  typeof piece.value === 'string' &&
+                  piece.value.includes(rule.prefix)
+                ) {
+                  const parts = piece.value.split(rulePattern);
+                  for (const part of parts) {
+                    if (
+                      part.startsWith(rule.prefix) &&
+                      part.endsWith(rule.suffix) &&
+                      part.length >= rule.prefix.length + rule.suffix.length
+                    ) {
+                      const innerText = part.slice(
+                        rule.prefix.length,
+                        part.length - rule.suffix.length
+                      );
+                      nextPieces.push({
+                        type: 'customMarkdown',
+                        data: {
+                          hName: 'span',
+                          hProperties: {
+                            'data-custom-markdown-id': rule.id,
+                          },
+                        },
+                        children: [{ type: 'text', value: innerText }],
+                      });
+                    } else if (part.length > 0) {
+                      nextPieces.push({ type: 'text', value: part });
+                    }
+                  }
+                } else {
+                  nextPieces.push(piece);
+                }
+              }
+              currentPieces = nextPieces;
+            }
+
+            for (const piece of currentPieces) {
+              newChildren.push(piece);
+            }
+          } else {
+            visit(child);
+            newChildren.push(child);
+          }
+        }
+        node.children = newChildren;
+      }
+
+      visit(tree);
+    };
+  };
+}
 
 /**
  * Custom remark plugin to parse ==highlighted words== syntax
@@ -46,6 +139,7 @@ interface MarkdownRendererProps {
   onDoubleClick?: () => void;
   isDark?: boolean;
   highlightColor?: string;
+  customMarkdownRules?: CustomMarkdownRule[];
 }
 
 export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
@@ -54,10 +148,15 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   onDoubleClick,
   isDark = false,
   highlightColor,
+  customMarkdownRules = [],
 }) => {
   // Counter ref to map rendered checkboxes to their sequential task index in the markdown
   const taskIndexCounter = useRef<number>(0);
   taskIndexCounter.current = 0;
+
+  const customMarkdownPlugin = useMemo(() => {
+    return createRemarkCustomMarkdown(customMarkdownRules);
+  }, [customMarkdownRules]);
 
   if (!content || !content.trim()) {
     return (
@@ -99,8 +198,25 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       }}
     >
       <Markdown
-        remarkPlugins={[remarkGfm, remarkHighlight]}
+        remarkPlugins={[remarkGfm, remarkHighlight, customMarkdownPlugin]}
         components={{
+          span: ({ node, children, ...props }: any) => {
+            const ruleId = props['data-custom-markdown-id'];
+            if (ruleId && customMarkdownRules) {
+              const rule = customMarkdownRules.find((r) => r.id === ruleId);
+              if (rule) {
+                return (
+                  <span
+                    className="custom-md-rendered"
+                    style={getCustomMarkdownStyle(rule)}
+                  >
+                    {children}
+                  </span>
+                );
+              }
+            }
+            return <span {...props}>{children}</span>;
+          },
           mark: ({ children }) => {
             const markBg = highlightColor || 'var(--note-highlight-color, #fef08a)';
             const hasDarkBg = highlightColor ? isColorDark(highlightColor) : false;

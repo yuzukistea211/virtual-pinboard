@@ -24,6 +24,7 @@ import {
   FontApplyScope,
   ThemeColorPreset,
   NoteColorPreset,
+  CustomMarkdownRule,
 } from '../types';
 import { HighlightColorPreset } from '../hooks/useNoteColorPresets';
 import {
@@ -32,8 +33,9 @@ import {
   isColorDark,
   DEFAULT_THEME_COLOR,
 } from '../utils/themePresets';
+import { CustomMarkdownSettingsTab } from './CustomMarkdownSettingsTab';
 
-export type SettingsTab = 'notes' | 'font' | 'theme';
+export type SettingsTab = 'notes' | 'font' | 'markdown' | 'theme';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -76,6 +78,14 @@ interface SettingsModalProps {
   themePresets: ThemeColorPreset[];
   activeThemePreset?: ThemeColorPreset;
   isThemeDark: boolean;
+
+  // Custom Markdown Props
+  customMarkdownRules?: CustomMarkdownRule[];
+  onAddCustomMarkdownRule?: (rule: Omit<CustomMarkdownRule, 'id' | 'createdAt'>) => CustomMarkdownRule;
+  onUpdateCustomMarkdownRule?: (id: string, updates: Partial<CustomMarkdownRule>) => void;
+  onDeleteCustomMarkdownRule?: (id: string) => void;
+  onDuplicateCustomMarkdownRule?: (id: string) => CustomMarkdownRule | null;
+  onResetCustomMarkdownRules?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -119,6 +129,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   themePresets,
   activeThemePreset,
   isThemeDark,
+
+  // Custom Markdown
+  customMarkdownRules = [],
+  onAddCustomMarkdownRule,
+  onUpdateCustomMarkdownRule,
+  onDeleteCustomMarkdownRule,
+  onDuplicateCustomMarkdownRule,
+  onResetCustomMarkdownRules,
 }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
 
@@ -344,6 +362,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           >
             <Type className="w-3.5 h-3.5 text-neutral-600" />
             <span>Font & Text</span>
+          </button>
+
+          {/* Custom Markdown Tab */}
+          <button
+            type="button"
+            id="tab-btn-markdown"
+            onClick={() => setActiveTab('markdown')}
+            className={`flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold border-b-2 -mb-px transition-colors ${
+              activeTab === 'markdown'
+                ? 'border-neutral-900 text-neutral-950 bg-white shadow-2xs'
+                : 'border-transparent text-neutral-600 hover:text-neutral-900 hover:bg-black/5'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-black-600" />
+            <span>Custom Markdown</span>
           </button>
 
           {/* Canvas Theme Tab */}
@@ -1438,6 +1471,37 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </div>
             </div>
           )}
+
+          {/* TAB 4: CUSTOM MARKDOWN */}
+          {activeTab === 'markdown' && (
+            <CustomMarkdownSettingsTab
+              rules={customMarkdownRules}
+              onAddRule={(newRule) => {
+                if (onAddCustomMarkdownRule) {
+                  const created = onAddCustomMarkdownRule(newRule);
+                  showStatus(`Added custom markdown "${newRule.name}"`);
+                  return created;
+                }
+                return { ...newRule, id: `custom_${Date.now()}`, createdAt: Date.now() };
+              }}
+              onUpdateRule={(id, updates) => {
+                onUpdateCustomMarkdownRule?.(id, updates);
+              }}
+              onDeleteRule={(id) => {
+                onDeleteCustomMarkdownRule?.(id);
+                showStatus('Deleted custom markdown rule');
+              }}
+              onDuplicateRule={(id) => {
+                const dup = onDuplicateCustomMarkdownRule?.(id) || null;
+                showStatus('Duplicated custom markdown rule');
+                return dup;
+              }}
+              onResetRules={() => {
+                onResetCustomMarkdownRules?.();
+                showStatus('Reset custom markdown rules to default');
+              }}
+            />
+          )}
         </div>
 
         {/* Modal Bottom Footer */}
@@ -1468,6 +1532,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               >
                 <RotateCcw className="w-3 h-3" />
                 <span>Reset Font</span>
+              </button>
+            )}
+
+            {activeTab === 'markdown' && (
+              <button
+                type="button"
+                onClick={() => {
+                  onResetCustomMarkdownRules?.();
+                  showStatus('Reset custom markdown rules to default');
+                }}
+                className="flex items-center gap-1 text-neutral-500 hover:text-neutral-900 transition-colors"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset Custom Markdown</span>
               </button>
             )}
 

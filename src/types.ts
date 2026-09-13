@@ -110,3 +110,29 @@ export interface ThemeSettings {
   themeColor: string; // HEX color code e.g. #ffffff
 }
 
+export interface CustomMarkdownRule {
+  id: string;
+  name: string;
+  prefix: string; // e.g. "!!" or "::" or "@@" or "[tag]"
+  suffix: string; // e.g. "!!" or "::" or "@@" or "[/tag]"
+  fontWeight: string; // e.g. '400', '500', '600', '700', '800', '900'
+  isBold: boolean;
+  isItalic: boolean;
+  fontSize: string; // e.g. '11px', '12px', '13px', '14px', '16px' or '0.85em', '1em', etc.
+  backgroundColor: string; // hex color or 'transparent'
+  textColor: string; // hex color or 'inherit'
+  textTransform: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
+  rotate: number; // degrees -15 to +15
+  scale?: number; // 0.85 to 1.25
+  skewX?: number; // degrees -15 to +15
+  borderRadius?: string; // e.g. '0px', '2px', '4px', '9999px'
+  borderWidth?: number; // 0, 1, 2
+  borderStyle?: 'solid' | 'dashed' | 'dotted' | 'none';
+  borderColor?: string;
+  paddingHorizontal?: number; // in px
+  paddingVertical?: number; // in px
+  letterSpacing?: number; // in px
+  textDecoration?: 'none' | 'underline' | 'line-through';
+  createdAt?: number;
+}
+
