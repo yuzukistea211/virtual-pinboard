@@ -16,23 +16,17 @@ import {
   Check,
   Highlighter,
 } from 'lucide-react';
-import { StickyNote, NoteColorPreset, CustomMarkdownRule } from '../types';
+import { StickyNote, NoteColorPreset } from '../types';
 import { MIN_NOTE_WIDTH, MIN_NOTE_HEIGHT, NOTE_COLOR_PRESETS } from '../constants';
 import { MarkdownRenderer } from './MarkdownRenderer';
-import {
-  applyMarkdownFormat,
-  toggleTaskInMarkdown,
-  MarkdownFormatType,
-} from '../utils/markdownUtils';
+import { applyMarkdownFormat, toggleTaskInMarkdown, MarkdownFormatType } from '../utils/markdownUtils';
 import { isColorDark, isValidHex, normalizeHex } from '../utils/themePresets';
 
 interface StickyNoteCardProps {
   note: StickyNote;
   colorPresets?: NoteColorPreset[];
   highlightColor?: string;
-  customMarkdownRules?: CustomMarkdownRule[];
   onOpenColorPresetsModal?: () => void;
-  onOpenCustomMarkdownSettings?: () => void;
   onUpdateContent: (id: string, text: string) => void;
   onUpdatePosition: (id: string, x: number, y: number) => void;
   onUpdateSize: (id: string, width: number, height: number) => void;
@@ -45,9 +39,7 @@ export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
   note,
   colorPresets,
   highlightColor,
-  customMarkdownRules = [],
   onOpenColorPresetsModal,
-  onOpenCustomMarkdownSettings,
   onUpdateContent,
   onUpdatePosition,
   onUpdateSize,
@@ -589,7 +581,7 @@ export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
               title="Markdown syntax reference"
               aria-label="Markdown syntax reference"
             >
-              <HelpCircle className="w-3.5 h-3.5" />
+              <HelpCircle className="w-2.5 h-2.5" />
             </button>
 
             {/* Compact Markdown Cheat-sheet Dropdown */}
@@ -621,37 +613,6 @@ export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
                   <p><span className="text-neutral-900 font-semibold">&gt;</span> Blockquote</p>
                   <p><span className="text-neutral-900 font-semibold">***</span> Horizontal Rule</p>
                   <p><span className="text-neutral-900 font-semibold">~~Strikethrough~~</span> text</p>
-                  {customMarkdownRules && customMarkdownRules.length > 0 && (
-                    <div className="pt-1.5 mt-1.5 border-t border-neutral-100">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-[9px] font-semibold text-neutral-400 uppercase tracking-wider">
-                          Custom Markdown
-                        </p>
-                        {onOpenCustomMarkdownSettings && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setShowCheatsheet(false);
-                              onOpenCustomMarkdownSettings();
-                            }}
-                            className="text-[9px] text-neutral-500 hover:text-neutral-900 hover:underline cursor-pointer"
-                          >
-                            Customize
-                          </button>
-                        )}
-                      </div>
-                      {customMarkdownRules.map((rule) => (
-                        <p key={rule.id} className="flex items-center justify-between gap-1 py-0.5">
-                          <span className="text-indigo-600 dark:text-indigo-400 font-semibold truncate">
-                            {rule.prefix}text{rule.suffix}
-                          </span>
-                          <span className="text-[9px] text-neutral-400 truncate text-right">
-                            {rule.name}
-                          </span>
-                        </p>
-                      ))}
-                    </div>
-                  )}
                 </div>
                 <div className="pt-1 border-t border-neutral-100 text-[9px] text-neutral-400">
                   Double-click note to edit. Esc to preview.
@@ -789,7 +750,6 @@ export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
               onDoubleClick={handleStartWriting}
               isDark={isDark}
               highlightColor={highlightColor}
-              customMarkdownRules={customMarkdownRules}
             />
           </div>
         )}

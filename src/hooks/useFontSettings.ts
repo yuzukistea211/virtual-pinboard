@@ -13,6 +13,7 @@ import {
   PRESET_FONTS,
   loadWebFontStylesheet,
   registerLocalFontFace,
+  buildGoogleFontUrl,
   detectFontDetails,
 } from '../utils/fontPresets';
 

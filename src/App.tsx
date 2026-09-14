@@ -8,7 +8,6 @@ import { usePinboard } from './hooks/usePinboard';
 import { useFontSettings } from './hooks/useFontSettings';
 import { useThemeSettings } from './hooks/useThemeSettings';
 import { useNoteColorPresets } from './hooks/useNoteColorPresets';
-import { useCustomMarkdown } from './hooks/useCustomMarkdown';
 import { StickyNoteCard } from './components/StickyNoteCard';
 import { MinimalDock } from './components/MinimalDock';
 import { BoardSwitcher } from './components/BoardSwitcher';
@@ -43,7 +42,6 @@ export default function App() {
   const fontManager = useFontSettings();
   const themeManager = useThemeSettings();
   const noteColorManager = useNoteColorPresets();
-  const customMarkdownManager = useCustomMarkdown();
 
   // Unified Settings Modal State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -161,9 +159,7 @@ export default function App() {
             note={note}
             colorPresets={noteColorManager.presets}
             highlightColor={noteColorManager.highlightColor}
-            customMarkdownRules={customMarkdownManager.rules}
             onOpenColorPresetsModal={() => handleOpenSettings('notes')}
-            onOpenCustomMarkdownSettings={() => handleOpenSettings('markdown')}
             onUpdateContent={updateNoteContent}
             onUpdatePosition={updateNotePosition}
             onUpdateSize={updateNoteSize}
@@ -213,7 +209,7 @@ export default function App() {
         isDraggingNewNote={isDraggingNewNote}
       />
 
-      {/* Unified Settings Modal (Note Colors & Highlight, Font, Custom Markdown, Canvas Theme) */}
+      {/* Unified Settings Modal (Note Colors & Highlight, Font, Canvas Theme) */}
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
@@ -252,13 +248,6 @@ export default function App() {
         themePresets={themeManager.presets}
         activeThemePreset={themeManager.activePreset}
         isThemeDark={themeManager.isDark}
-        // Custom Markdown
-        customMarkdownRules={customMarkdownManager.rules}
-        onAddCustomMarkdownRule={customMarkdownManager.addRule}
-        onUpdateCustomMarkdownRule={customMarkdownManager.updateRule}
-        onDeleteCustomMarkdownRule={customMarkdownManager.deleteRule}
-        onDuplicateCustomMarkdownRule={customMarkdownManager.duplicateRule}
-        onResetCustomMarkdownRules={customMarkdownManager.resetToDefaults}
       />
     </main>
   );
