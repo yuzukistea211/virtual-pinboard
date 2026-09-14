@@ -623,9 +623,23 @@ export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
                   <p><span className="text-neutral-900 font-semibold">~~Strikethrough~~</span> text</p>
                   {customMarkdownRules && customMarkdownRules.length > 0 && (
                     <div className="pt-1.5 mt-1.5 border-t border-neutral-100">
-                      <p className="text-[9px] font-semibold text-neutral-400 mb-1 uppercase tracking-wider">
-                        Custom Markdown
-                      </p>
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-[9px] font-semibold text-neutral-400 uppercase tracking-wider">
+                          Custom Markdown
+                        </p>
+                        {onOpenCustomMarkdownSettings && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowCheatsheet(false);
+                              onOpenCustomMarkdownSettings();
+                            }}
+                            className="text-[9px] text-neutral-500 hover:text-neutral-900 hover:underline cursor-pointer"
+                          >
+                            Customize
+                          </button>
+                        )}
+                      </div>
                       {customMarkdownRules.map((rule) => (
                         <p key={rule.id} className="flex items-center justify-between gap-1 py-0.5">
                           <span className="text-indigo-600 dark:text-indigo-400 font-semibold truncate">

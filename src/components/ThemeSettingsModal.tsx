@@ -4,7 +4,6 @@ import {
   Palette,
   RotateCcw,
   Check,
-  FileText,
   CheckSquare,
 } from 'lucide-react';
 import { ThemeColorPreset } from '../types';

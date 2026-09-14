@@ -192,29 +192,3 @@ export function getCustomMarkdownStyle(rule: CustomMarkdownRule): React.CSSPrope
     WebkitBoxDecorationBreak: 'clone',
   };
 }
-
-/**
- * Apply a custom markdown rule (wrap selected text or insert placeholder with prefix & suffix)
- */
-export function applyCustomMarkdownFormat(
-  content: string,
-  selectionStart: number,
-  selectionEnd: number,
-  rule: CustomMarkdownRule
-): { newText: string; newCursorStart: number; newCursorEnd: number } {
-  const selectedText = content.substring(selectionStart, selectionEnd);
-  const before = content.substring(0, selectionStart);
-  const after = content.substring(selectionEnd);
-
-  const prefix = rule.prefix || '::';
-  const suffix = rule.suffix || '::';
-  const inner = selectedText || rule.name || 'custom text';
-
-  const wrapped = `${prefix}${inner}${suffix}`;
-  const newText = before + wrapped + after;
-
-  const start = selectionStart + prefix.length;
-  const end = selectionStart + prefix.length + inner.length;
-
-  return { newText, newCursorStart: start, newCursorEnd: end };
-}

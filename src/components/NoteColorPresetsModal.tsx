@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Plus, Trash2, RotateCcw, Check, Sparkles } from 'lucide-react';
+import { X, Plus, Trash2, RotateCcw, Sparkles } from 'lucide-react';
 import { NoteColorPreset } from '../types';
 import { isValidHex, normalizeHex, isColorDark } from '../utils/themePresets';
 

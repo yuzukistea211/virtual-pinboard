@@ -5,7 +5,6 @@ import {
   Trash2,
   Copy,
   RotateCcw,
-  Check,
   Eye,
   Sliders,
   Bold,
@@ -13,7 +12,6 @@ import {
   Type,
   Palette,
   Layers,
-  ChevronRight,
   Code2,
   X,
   HelpCircle,
@@ -56,85 +54,6 @@ const PRESET_TEXT_COLORS = [
   '#22C55E', // Neon Green
 ];
 
-const TEMPLATES = [
-  {
-    name: 'Important Alert',
-    prefix: '!!',
-    suffix: '!!',
-    fontWeight: '700',
-    isBold: true,
-    isItalic: false,
-    fontSize: '11px',
-    backgroundColor: '#FEF2F2',
-    textColor: '#DC2626',
-    textTransform: 'uppercase' as const,
-    rotate: 0,
-    borderRadius: '3px',
-    borderWidth: 1,
-    borderStyle: 'solid' as const,
-    borderColor: '#FECACA',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-  },
-  {
-    name: 'Tilted Stamp',
-    prefix: '^^',
-    suffix: '^^',
-    fontWeight: '700',
-    isBold: true,
-    isItalic: true,
-    fontSize: '12px',
-    backgroundColor: '#FEF3C7',
-    textColor: '#B45309',
-    textTransform: 'capitalize' as const,
-    rotate: -3,
-    borderRadius: '2px',
-    borderWidth: 1,
-    borderStyle: 'dashed' as const,
-    borderColor: '#F59E0B',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-  },
-  {
-    name: 'Feature Pill',
-    prefix: '@@',
-    suffix: '@@',
-    fontWeight: '600',
-    isBold: false,
-    isItalic: false,
-    fontSize: '11px',
-    backgroundColor: '#EFF6FF',
-    textColor: '#1D4ED8',
-    textTransform: 'none' as const,
-    rotate: 0,
-    borderRadius: '9999px',
-    borderWidth: 1,
-    borderStyle: 'solid' as const,
-    borderColor: '#BFDBFE',
-    paddingHorizontal: 8,
-    paddingVertical: 1,
-  },
-  {
-    name: 'Cyberpunk Neon',
-    prefix: '%%',
-    suffix: '%%',
-    fontWeight: '700',
-    isBold: true,
-    isItalic: false,
-    fontSize: '11px',
-    backgroundColor: '#18181B',
-    textColor: '#22C55E',
-    textTransform: 'uppercase' as const,
-    rotate: 0,
-    borderRadius: '2px',
-    borderWidth: 1,
-    borderStyle: 'solid' as const,
-    borderColor: '#22C55E',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-  },
-];
-
 export const CustomMarkdownSettingsTab: React.FC<CustomMarkdownSettingsTabProps> = ({
   rules,
   onAddRule,
@@ -171,18 +90,6 @@ export const CustomMarkdownSettingsTab: React.FC<CustomMarkdownSettingsTabProps>
       borderColor: '#BFDBFE',
       paddingHorizontal: 6,
       paddingVertical: 1,
-      letterSpacing: 0,
-      textDecoration: 'none',
-    });
-    setSelectedRuleId(newRule.id);
-  };
-
-  const handleApplyTemplate = (tpl: typeof TEMPLATES[0]) => {
-    const newRule = onAddRule({
-      ...tpl,
-      name: `${tpl.name} (${rules.length + 1})`,
-      scale: 1,
-      skewX: 0,
       letterSpacing: 0,
       textDecoration: 'none',
     });
@@ -311,26 +218,6 @@ export const CustomMarkdownSettingsTab: React.FC<CustomMarkdownSettingsTabProps>
                 </div>
               );
             })}
-          </div>
-
-          {/* Quick Presets / Templates */}
-          <div className="pt-2 border-t border-neutral-200">
-            <span className="text-[11px] font-semibold text-neutral-600 uppercase tracking-wider block mb-2">
-              Quick Templates
-            </span>
-            <div className="grid grid-cols-2 gap-1.5">
-              {TEMPLATES.map((tpl) => (
-                <button
-                  key={tpl.name}
-                  type="button"
-                  onClick={() => handleApplyTemplate(tpl)}
-                  className="px-2 py-1.5 border border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50 text-[11px] text-neutral-700 text-left truncate transition-colors flex items-center gap-1.5"
-                >
-                  <Plus className="w-3 h-3 text-neutral-400 shrink-0" />
-                  <span className="truncate">{tpl.name}</span>
-                </button>
-              ))}
-            </div>
           </div>
         </div>
 
