@@ -124,8 +124,11 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
 
         {/* Clear All Notes */}
         {showClearConfirm ? (
-          <div className="flex items-center gap-1 bg-neutral-100 border border-neutral-300 px-2 py-1 text-xs">
-            <span className="text-red-600 font-medium">Clear all?</span>
+          <div
+            id="clear-confirm-dialog"
+            className="flex items-center gap-1 bg-neutral-100 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 px-2 py-1 text-xs transition-colors"
+          >
+            <span className="text-red-600 dark:text-red-400 font-medium">Clear all?</span>
             <button
               type="button"
               id="btn-clear-confirm"
@@ -133,7 +136,7 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
                 onClear();
                 setShowClearConfirm(false);
               }}
-              className="px-1.5 py-0.5 bg-red-600 text-white text-[11px] font-medium"
+              className="px-1.5 py-0.5 bg-red-600 hover:bg-red-700 text-white text-[11px] font-medium transition-colors"
             >
               Yes
             </button>
@@ -141,7 +144,7 @@ export const MinimalDock: React.FC<MinimalDockProps> = ({
               type="button"
               id="btn-clear-cancel"
               onClick={() => setShowClearConfirm(false)}
-              className="px-1.5 py-0.5 text-neutral-600 text-[11px]"
+              className="px-1.5 py-0.5 text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white text-[11px] transition-colors"
             >
               Cancel
             </button>

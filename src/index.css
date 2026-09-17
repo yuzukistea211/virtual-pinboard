@@ -155,6 +155,41 @@ html[data-theme-tone="dark"] nav[aria-label="Pinboard actions"] button:hover {
   background-color: rgba(255, 255, 255, 0.12) !important;
 }
 
+/* Clear Confirmation Dialog in Dark Mode */
+html[data-theme-tone="dark"] div#root > main#canvas-container > nav > div:nth-of-type(3),
+html[data-theme-tone="dark"] nav[aria-label="Pinboard actions"] > div:nth-of-type(3),
+html[data-theme-tone="dark"] #clear-confirm-dialog {
+  background-color: var(--theme-surface, #1f2937) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+}
+
+html[data-theme-tone="dark"] div#root > main#canvas-container > nav > div:nth-of-type(3) span,
+html[data-theme-tone="dark"] nav[aria-label="Pinboard actions"] > div:nth-of-type(3) span,
+html[data-theme-tone="dark"] #clear-confirm-dialog span {
+  color: #f87171 !important;
+}
+
+html[data-theme-tone="dark"] div#root > main#canvas-container > nav > div:nth-of-type(3) #btn-clear-confirm,
+html[data-theme-tone="dark"] nav[aria-label="Pinboard actions"] > div:nth-of-type(3) #btn-clear-confirm,
+html[data-theme-tone="dark"] #clear-confirm-dialog #btn-clear-confirm {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+html[data-theme-tone="dark"] div#root > main#canvas-container > nav > div:nth-of-type(3) #btn-clear-cancel,
+html[data-theme-tone="dark"] nav[aria-label="Pinboard actions"] > div:nth-of-type(3) #btn-clear-cancel,
+html[data-theme-tone="dark"] #clear-confirm-dialog #btn-clear-cancel {
+  color: #cbd5e1 !important;
+}
+
+html[data-theme-tone="dark"] div#root > main#canvas-container > nav > div:nth-of-type(3) #btn-clear-cancel:hover,
+html[data-theme-tone="dark"] nav[aria-label="Pinboard actions"] > div:nth-of-type(3) #btn-clear-cancel:hover,
+html[data-theme-tone="dark"] #clear-confirm-dialog #btn-clear-cancel:hover {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
 html[data-theme-tone="dark"] #draggable-note-spawner {
   background-color: #ffffff !important;
   color: #0f172a !important;

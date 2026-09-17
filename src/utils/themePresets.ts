@@ -161,6 +161,7 @@ export function applyThemeColorToDOM(hex: string) {
   root.style.setProperty('--theme-bg', valid);
   root.style.setProperty('--ui-bg', valid);
   root.setAttribute('data-theme-tone', isDark ? 'dark' : 'light');
+  root.classList.toggle('dark', isDark);
 
   if (isDark) {
     root.style.setProperty('--theme-text', '#f3f4f6');
